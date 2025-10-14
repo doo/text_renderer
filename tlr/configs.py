@@ -353,12 +353,15 @@ def generate_per_font_configs():
 
 
 def generate_all_configs():
+    images_to_render = 10**6
     all_configs = []
-    all_configs.extend(generate_basic_configs(20))
-    all_configs.extend(generate_mixed_style_configs(20))
-    all_configs.extend(generate_with_adjacent_line_configs(20))
-    all_configs.extend(generate_hard_bg_configs(20))
-    all_configs.extend(generate_extreme_fonts_configs(20))
+    all_configs.extend(generate_basic_configs(round(images_to_render * 0.3)))
+    all_configs.extend(generate_mixed_style_configs(round(images_to_render * 0.3)))
+    all_configs.extend(
+        generate_with_adjacent_line_configs(round(images_to_render * 0.3))
+    )
+    all_configs.extend(generate_hard_bg_configs(round(images_to_render * 0.1)))
+    all_configs.extend(generate_extreme_fonts_configs(round(images_to_render * 0.05)))
 
     # debug per font
     # all_configs.extend(generate_per_font_configs())
