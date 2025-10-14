@@ -1,0 +1,17 @@
+NotoColorEmojiCompatTest-Regular.ttf
+NotoSansMono[wdth,wght].ttf
+NotoSerifMyanmar-Thin.ttf
+NotoSansMalayalamUI[wdth,wght].ttf
+NotoSansMandaic-Regular.ttf
+Phetsarath-Regular.ttf
+
+MeieScript-Regular.ttf
+OdorMeanChey-Regular.ttf
+RuslanDisplay.ttf
+Sarpanch-Black.ttf
+Phudu[wght].ttf
+Staatliches-Regular.ttf
+Girassol-Regular.ttf
+SpectralSC-LightItalic.ttf
+AlegreyaSC-Black.ttf
+SpectralSC-Light.ttf
