@@ -1,0 +1,6 @@
+outs:
+- md5: b615961c3ac7ce43393ad1ffa29865b3.dir
+  size: 63681396
+  nfiles: 45
+  hash: md5
+  path: bg

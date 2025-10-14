@@ -1,0 +1,6 @@
+outs:
+- md5: 319d809e4a4b8c7687239042dc75b644.dir
+  size: 340892
+  nfiles: 3
+  hash: md5
+  path: bg_simple
