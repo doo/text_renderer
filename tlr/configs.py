@@ -56,7 +56,7 @@ def create_font_list():
             if font_file.is_file():
                 f.write(font_file.name + '\n')
             counter += 1
-            if counter == 300:  # DELETE
+            if counter == 300:  # DELETE for more fonts
                 break
 
 
