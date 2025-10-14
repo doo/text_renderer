@@ -67,6 +67,10 @@ perspective_transform = NormPerspectiveTransformCfg(20, 20, 1.5)
 LATIN_TEXTS = [TEXT_DIR / f"{lang_code}_text.txt" for lang_code in latin_languages]
 
 
+def get_num_images(num_images, part):
+    return max(1, round(num_images * part))
+
+
 def base_cfg(
     name: str,
     corpus,
@@ -171,7 +175,7 @@ def generate_basic_configs(num_images):
                         Padding(p=0.9, w_ratio=[0.1, 0.2], h_ratio=[0.1, 0.2]),
                     ]
                 ),
-                num_images=int(num_images * w / 2),
+                num_images=get_num_images(num_images, w / 2),
             )
         )
 
@@ -192,7 +196,7 @@ def generate_basic_configs(num_images):
                         Padding(p=0.9, w_ratio=[0.1, 0.2], h_ratio=[0.1, 0.2]),
                     ]
                 ),
-                num_images=int(num_images * w / 2),
+                num_images=get_num_images(num_images, w / 2),
             )
         )
 
@@ -217,7 +221,7 @@ def generate_mixed_style_configs(num_images):
                     Effects([Padding(p=0.3, w_ratio=[0, 0.01]), DropoutRand(p=0.2)]),
                 ],
                 layout_effects=Effects(Line(p=0.5)),
-                num_images=int(num_images * w),
+                num_images=get_num_images(num_images, w),
             )
         )
 
@@ -242,7 +246,7 @@ def generate_with_adjacent_line_configs(num_images):
                     NoEffects(),
                 ],
                 layout_effects=Effects(Line(p=0.5)),
-                num_images=int(num_images * w),
+                num_images=get_num_images(num_images, w),
             )
         )
 
@@ -269,7 +273,7 @@ def generate_hard_bg_configs(num_images):
                     ]
                 ),
                 bg_dir=BG_DIR,
-                num_images=int(num_images * w),
+                num_images=get_num_images(num_images, w),
             )
         )
 
@@ -293,7 +297,7 @@ def generate_extreme_fonts_configs(num_images):
                         Padding(p=0.9, w_ratio=[0.1, 0.2], h_ratio=[0.1, 0.2]),
                     ]
                 ),
-                num_images=int(num_images * w / 2),
+                num_images=get_num_images(num_images, w / 2),
             )
         )
 
@@ -314,7 +318,7 @@ def generate_extreme_fonts_configs(num_images):
                         Padding(p=0.9, w_ratio=[0.1, 0.2], h_ratio=[0.1, 0.2]),
                     ]
                 ),
-                num_images=int(num_images * w / 2),
+                num_images=get_num_images(num_images, w / 2),
             )
         )
 
@@ -353,15 +357,16 @@ def generate_per_font_configs():
 
 
 def generate_all_configs():
-    images_to_render = 10**6
+    num_images = 10**6
+
     all_configs = []
-    all_configs.extend(generate_basic_configs(round(images_to_render * 0.3)))
-    all_configs.extend(generate_mixed_style_configs(round(images_to_render * 0.3)))
+    all_configs.extend(generate_basic_configs(get_num_images(num_images, 0.3)))
+    all_configs.extend(generate_mixed_style_configs(get_num_images(num_images, 0.3)))
     all_configs.extend(
-        generate_with_adjacent_line_configs(round(images_to_render * 0.3))
+        generate_with_adjacent_line_configs(get_num_images(num_images, 0.3))
     )
-    all_configs.extend(generate_hard_bg_configs(round(images_to_render * 0.1)))
-    all_configs.extend(generate_extreme_fonts_configs(round(images_to_render * 0.05)))
+    all_configs.extend(generate_hard_bg_configs(get_num_images(num_images, 0.1)))
+    all_configs.extend(generate_extreme_fonts_configs(get_num_images(num_images, 0.05)))
 
     # debug per font
     # all_configs.extend(generate_per_font_configs())
