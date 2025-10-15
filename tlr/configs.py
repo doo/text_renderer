@@ -325,6 +325,82 @@ def generate_extreme_fonts_configs(num_images):
     return configs
 
 
+def generate_validation_configs(num_images):
+    configs = []
+
+    corpus = get_word_corpus(FONT_LIST_DIR / 'fragile_and_robust_fonts.txt')
+    ds_name = 'validation'
+    w = 0.25  # part of num_images per config
+
+    configs.append(
+        base_cfg(
+            ds_name,
+            corpus=corpus,
+            layout_effects=Effects(
+                [
+                    Line(0.5, color_cfg=SimpleTextColorCfg()),
+                    OneOf(
+                        [
+                            DropoutRand(),
+                            DropoutVertical(thickness=1),
+                            DropoutHorizontal(thickness=1),
+                        ]
+                    ),
+                    Padding(p=0.9, w_ratio=[0.1, 0.2], h_ratio=[0.1, 0.2]),
+                ]
+            ),
+            num_images=get_num_images(num_images, w),
+        )
+    )
+
+    configs.append(
+        base_cfg(
+            ds_name,
+            layout=SameLineLayout(h_spacing=(0, 0.01)),
+            corpus=[corpus, corpus],
+            corpus_effects=[
+                Effects([Padding(p=0.3, w_ratio=[0, 0.01]), DropoutRand(p=0.2)]),
+                Effects([Padding(p=0.3, w_ratio=[0, 0.01]), DropoutRand(p=0.2)]),
+            ],
+            layout_effects=Effects(Line(p=0.5)),
+            num_images=get_num_images(num_images, w),
+        )
+    )
+
+    configs.append(
+        base_cfg(
+            ds_name,
+            layout=ExtraTextLineLayout(bottom_prob=0.5),
+            corpus=[corpus, corpus],
+            corpus_effects=[
+                Effects([Padding(p=0.9), DropoutRand(p=0.2)]),
+                NoEffects(),
+            ],
+            layout_effects=Effects(Line(p=0.5)),
+            num_images=get_num_images(num_images, w),
+        )
+    )
+
+    corpus = get_word_corpus(FONT_LIST_DIR / 'robust_fonts.txt')
+    configs.append(
+        base_cfg(
+            ds_name,
+            corpus=corpus,
+            corpus_effects=Effects(
+                [
+                    Line(0.5, color_cfg=SimpleTextColorCfg()),
+                    DropoutRand(p=0.5),
+                    Padding(p=0.9, w_ratio=[0.1, 0.2], h_ratio=[0.1, 0.2]),
+                ]
+            ),
+            bg_dir=BG_DIR,
+            num_images=get_num_images(num_images, w),
+        )
+    )
+
+    return configs
+
+
 def generate_per_font_configs():
     configs = []
 
@@ -367,6 +443,8 @@ def generate_all_configs():
     )
     all_configs.extend(generate_hard_bg_configs(get_num_images(num_images, 0.1)))
     all_configs.extend(generate_extreme_fonts_configs(get_num_images(num_images, 0.05)))
+
+    all_configs.extend(generate_validation_configs(100))
 
     # debug per font
     # all_configs.extend(generate_per_font_configs())
