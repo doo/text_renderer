@@ -4,7 +4,9 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
 
-from make_per_language_char_set import latin_languages
+# from make_per_language_char_set import latin_languages
+latin_languages = ['en', 'de']
+
 from text_renderer.config import (
     GeneratorCfg,
     NormPerspectiveTransformCfg,
@@ -61,7 +63,6 @@ def create_font_list():
 
 
 # create_font_list()
-
 
 perspective_transform = NormPerspectiveTransformCfg(20, 20, 1.5)
 LATIN_TEXTS = [TEXT_DIR / f"{lang_code}_text.txt" for lang_code in latin_languages]
@@ -152,9 +153,9 @@ def get_rand_corpus(font_list_file, length=(3, 30)):
 
 
 CORPUS_FUNCTIONS = {
-    'slice': (0.45, get_slice_corpus),
-    'word': (0.45, get_word_corpus),
-    'rand': (0.1, get_rand_corpus),
+    'slice': (0.5, get_slice_corpus),
+    'word': (0.5, get_word_corpus),
+    # 'rand': (0.1, get_rand_corpus),
 }
 
 
