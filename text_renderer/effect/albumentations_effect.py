@@ -25,16 +25,20 @@ class AlbumentationsEffect(Effect):
 
         # Convert PIL image to numpy array
         img_array = np.array(img)
-        
+
         # Check if image has alpha channel (RGBA)
         has_alpha = img_array.shape[-1] == 4
-        
+
         if has_alpha:
             # Convert RGBA to RGB for albumentations
             # Create a white background and composite the RGBA image onto it
-            rgb_array = np.zeros((img_array.shape[0], img_array.shape[1], 3), dtype=np.uint8)
+            rgb_array = np.zeros(
+                (img_array.shape[0], img_array.shape[1], 3), dtype=np.uint8
+            )
             alpha = img_array[:, :, 3:4] / 255.0
-            rgb_array = (img_array[:, :, :3] * alpha + (1 - alpha) * 255).astype(np.uint8)
+            rgb_array = (img_array[:, :, :3] * alpha + (1 - alpha) * 255).astype(
+                np.uint8
+            )
         else:
             rgb_array = img_array
 
@@ -45,7 +49,9 @@ class AlbumentationsEffect(Effect):
         # Convert back to PIL image
         if has_alpha:
             # Convert back to RGBA by adding the original alpha channel
-            rgba_array = np.zeros((transformed_img.shape[0], transformed_img.shape[1], 4), dtype=np.uint8)
+            rgba_array = np.zeros(
+                (transformed_img.shape[0], transformed_img.shape[1], 4), dtype=np.uint8
+            )
             rgba_array[:, :, :3] = transformed_img
             rgba_array[:, :, 3] = img_array[:, :, 3]  # Preserve original alpha
             return Image.fromarray(rgba_array, mode='RGBA'), text_bbox
@@ -162,9 +168,7 @@ class SaltPepperNoise(AlbumentationsEffect):
         p: float
             Probability of applying this effect
         """
-        transform = A.SaltAndPepper(
-            p=p, salt_vs_pepper=(0.4, 0.6), amount=(0.02, 0.06)
-        )
+        transform = A.SaltAndPepper(p=p, salt_vs_pepper=(0.4, 0.6), amount=(0.02, 0.06))
         super().__init__(p, transform)
 
 
@@ -172,7 +176,7 @@ class PoissonNoise(AlbumentationsEffect):
     def __init__(self, p=1.0, intensity=(0.1, 0.5), color_shift=(0.01, 0.05)):
         """
         Poisson noise effect using Albumentations ISONoise
-        
+
         ISONoise simulates camera sensor noise which follows a Poisson distribution
         characteristic of photon counting noise in digital imaging.
 
@@ -185,11 +189,7 @@ class PoissonNoise(AlbumentationsEffect):
         color_shift: tuple
             Range for color shift values
         """
-        transform = A.ISONoise(
-            intensity=intensity,
-            color_shift=color_shift,
-            p=1.0
-        )
+        transform = A.ISONoise(intensity=intensity, color_shift=color_shift, p=1.0)
         super().__init__(p, transform)
 
 
@@ -309,4 +309,55 @@ class OpticalDistortion(AlbumentationsEffect):
             Maximum shift
         """
         transform = A.OpticalDistortion(distort_limit=distort_limit, p=1.0)
+        super().__init__(p, transform)
+
+
+def per_channel_coarse_dropout(
+    img, splits_per_height=(0, 1, 2), width_size=(1 / 32, 31 / 32), shape=None
+):
+    if len(img.shape) == 3 and img.shape[2] == 3:
+        h, w = img.shape[:2]
+        min_width = int(w * width_size[0])
+        max_width = int(w * width_size[1])
+        x0 = 0
+        while True:
+            num_splits = np.random.choice(splits_per_height)
+            y_ends = sorted(set(np.random.randint(1, h, num_splits))) + [h]
+            width = min(np.random.randint(min_width, max_width), w - x0)
+            if width == 0:
+                break
+            x1 = x0 + width
+            assert x1 > x0
+            y0 = 0
+            for y1 in y_ends:
+                num_channels = np.random.choice((0, 1, 2))
+                target_channels = np.random.choice(3, num_channels, replace=False)
+                for ch in target_channels:
+                    weight = np.random.uniform(0.5, 1.0)
+                    img[y0:y1, x0:x1, ch] = np.rint(
+                        img[y0:y1, x0:x1, ch] * weight
+                    ).astype(np.uint8)
+                x0 = x1
+    return img
+
+
+class TLR(AlbumentationsEffect):
+    def __init__(self, p=1.0):
+        transform = A.OneOf(
+            [
+                A.GaussianBlur(blur_limit=(1, 3), p=1.0),
+                A.MotionBlur(blur_limit=(3, 5), p=1.0),
+                A.Lambda(image=per_channel_coarse_dropout, p=1.0),
+                A.SaltAndPepper(
+                    noise_ratio=(0.01, 0.1),
+                    salt_vs_pepper=(0.5, 0.5),
+                    per_channel=True,
+                    p=1.0,
+                ),
+                A.InvertImg(p=1.0),
+                A.NoOp(p=1.0),
+            ],
+            p=1.0,
+        )
+
         super().__init__(p, transform)

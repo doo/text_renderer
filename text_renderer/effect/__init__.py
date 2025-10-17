@@ -12,6 +12,7 @@ from .albumentations_effect import MotionBlur as AlbumentationsMotionBlur
 Emboss = AlbumentationsEmboss
 MotionBlur = AlbumentationsMotionBlur
 from .albumentations_effect import (
+    TLR,
     Noise,
     OpticalDistortion,
     PoissonNoise,
@@ -21,6 +22,7 @@ from .albumentations_effect import (
     UniformNoise,
 )
 from .base_effect import Effect, Effects, NoEffects
+from .curve import Curve
 from .dropout_horizontal import DropoutHorizontal
 from .dropout_rand import DropoutRand
 from .dropout_vertical import DropoutVertical
@@ -28,7 +30,6 @@ from .line import Line
 from .padding import Padding
 from .selector import OneOf
 from .text_border import TextBorder
-from .curve import Curve
 
 __all__ = [
     "Effect",
@@ -58,4 +59,5 @@ __all__ = [
     "ElasticTransform",
     "GridDistortion",
     "OpticalDistortion",
+    "TLR",
 ]

@@ -90,6 +90,7 @@ def base_cfg(
             perspective_transform=perspective_transform,
             gray=gray,
             layout_effects=layout_effects,
+            render_effects=Effects(TLR()),
             layout=layout,
             corpus=corpus,
             corpus_effects=corpus_effects,
