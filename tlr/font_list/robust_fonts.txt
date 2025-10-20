@@ -78,3 +78,15 @@ UbuntuMono-Bold.ttf
 UbuntuMono-BoldItalic.ttf
 WixMadeforText-Bold.ttf
 WixMadeforText-BoldItalic.ttf
+Anton-Regular.ttf
+Prompt-BlackItalic.ttf
+LondrinaSolid-Black.ttf
+Livvic-Black.ttf
+FiraSansCondensed-Black.ttf
+TitilliumWeb-Black.ttf
+BarlowCondensed-BlackItalic.ttf
+MontserratAlternates-Black.ttf
+Blinker-Black.ttf
+BlackOpsOne-Regular.ttf
+HelveticaNeue BlackCond.ttf
+MontserratAlternates-Bold.ttf
