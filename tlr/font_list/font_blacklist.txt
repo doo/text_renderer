@@ -17,3 +17,5 @@ AlegreyaSC-Black.ttf
 SpectralSC-Light.ttf
 RubikMonoOne-Regular.ttf
 Monoton-Regular.ttf
+CMC-7.ttf
+CREDC___.ttf

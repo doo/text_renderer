@@ -33,6 +33,28 @@ TEXT_DIR = DATA_DIR / "text"
 FONT_SIZE = (30, 31)
 
 
+def merge_fragile_and_robust_fonts():
+    fragile_file = FONT_LIST_DIR / "fragile_fonts.txt"
+    robust_file = FONT_LIST_DIR / "robust_fonts.txt"
+    out_file = FONT_LIST_DIR / "fragile_and_robust_fonts.txt"
+
+    fragile_fonts = []
+    with open(fragile_file, 'r') as f:
+        fragile_fonts = [line.strip() for line in f if line.strip()]
+
+    robust_fonts = []
+    with open(robust_file, 'r') as f:
+        robust_fonts = [line.strip() for line in f if line.strip()]
+
+    all_fonts = sorted(set(fragile_fonts + robust_fonts))
+    with open(out_file, 'w') as f:
+        for font in all_fonts:
+            f.write(font + '\n')
+
+
+merge_fragile_and_robust_fonts()
+
+
 def get_font_blacklist():
     if not FONT_BLACKLIST.exists():
         return []
