@@ -1,3 +1,4 @@
+import random
 import re
 import time
 from pathlib import Path
@@ -150,11 +151,35 @@ def delete_sequences_of_whitespaces(path: Path) -> None:
         print(f"Failed to delete sequences of whitespaces in file {path}: {e}")
 
 
+def augment_texts(path: Path) -> None:
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+
+        with open(path, 'w', encoding='utf-8') as f:
+            for line in lines:
+                if random.random() < 0.1:
+                    f.write(line.upper())
+                elif random.random() < 0.1:
+                    words = line.split()
+                    modified_words = [
+                        word.upper() if random.random() < 0.5 else word
+                        for word in words
+                    ]
+                    f.write(' '.join(modified_words))
+                else:
+                    f.write(line)
+
+    except IOError as e:
+        print(f"Failed to augment texts in file {path}: {e}")
+
+
 def main() -> None:
     for language in tqdm(languages, desc="Processing languages"):
         process_language(language)
         delete_empty_lines_in_file(make_language_text_file(language))
         delete_sequences_of_whitespaces(make_language_text_file(language))
+        augment_texts(make_language_text_file(language))
 
 
 if __name__ == "__main__":
