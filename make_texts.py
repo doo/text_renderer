@@ -1,3 +1,4 @@
+import re
 import time
 from pathlib import Path
 from typing import Dict, List
@@ -137,10 +138,23 @@ def delete_empty_lines_in_file(path: Path) -> None:
         print(f"Failed to delete empty lines in file {path}: {e}")
 
 
+def delete_sequences_of_whitespaces(path: Path) -> None:
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        content = re.sub(r'\s{2,}', ' ', content)
+        with open(path, 'w', encoding='utf-8') as f:
+            f.write(content)
+
+    except IOError as e:
+        print(f"Failed to delete sequences of whitespaces in file {path}: {e}")
+
+
 def main() -> None:
     for language in tqdm(languages, desc="Processing languages"):
         process_language(language)
         delete_empty_lines_in_file(make_language_text_file(language))
+        delete_sequences_of_whitespaces(make_language_text_file(language))
 
 
 if __name__ == "__main__":
