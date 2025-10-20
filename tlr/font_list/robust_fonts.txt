@@ -51,3 +51,19 @@ BalsamiqSans-Bold.ttf
 K2D-SemiBold.ttf
 Alkatra[wght].ttf
 Andika-Bold.ttf
+B612Mono-Bold.ttf
+UbuntuMono-Bold.ttf
+ChivoMono[wght].ttf
+IBMPlexMono-Bold.ttf
+IBMPlexMono-BoldItalic.ttf
+Ubuntu Mono Bold.ttf
+FiraMono-Medium.ttf
+SometypeMono-Bold.ttf
+SpaceMono-BoldItalic.ttf
+SpaceMono-Bold.ttf
+B612Mono-BoldItalic.ttf
+SometypeMono-BoldItalic.ttf
+Bitstream Vera Sans Mono Bold.ttf
+MonomaniacOne-Regular.ttf
+IBMPlexMono-SemiBold.ttf
+FiraMono-Bold.ttf

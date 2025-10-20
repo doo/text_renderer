@@ -15,3 +15,5 @@ Girassol-Regular.ttf
 SpectralSC-LightItalic.ttf
 AlegreyaSC-Black.ttf
 SpectralSC-Light.ttf
+RubikMonoOne-Regular.ttf
+Monoton-Regular.ttf

@@ -34,7 +34,7 @@ def get_font_blacklist():
 
 
 def get_font_list():
-    src_file = FONT_LIST_DIR / "fragile_and_robust_fonts.txt"
+    src_file = FONT_LIST
     assert src_file.exists()
 
     with open(src_file, 'r', encoding='utf-8') as f:
