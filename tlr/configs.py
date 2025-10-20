@@ -31,6 +31,7 @@ FONT_BLACKLIST = FONT_LIST_DIR / "font_blacklist.txt"
 TEXT_DIR = DATA_DIR / "text"
 
 FONT_SIZE = (30, 31)
+CHAR_SPACING = (-0.1, 0.5)
 
 
 def merge_fragile_and_robust_fonts():
@@ -141,7 +142,7 @@ def get_slice_corpus(font_list_file, length=(1, 30)):
             filter_by_chars=True,
             chars_file=CHAR_DIR / f"latin.txt",
             length=length,
-            char_spacing=-1,
+            char_spacing=CHAR_SPACING,
             font_dir=FONT_DIR,
             font_list_file=font_list_file,
             font_size=FONT_SIZE,
@@ -156,6 +157,7 @@ def get_word_corpus(font_list_file, num_word=(1, 5)):
             filter_by_chars=True,
             chars_file=CHAR_DIR / f"latin.txt",
             num_word=num_word,
+            char_spacing=CHAR_SPACING,
             font_dir=FONT_DIR,
             font_list_file=font_list_file,
             font_size=FONT_SIZE,
@@ -168,6 +170,7 @@ def get_rand_corpus(font_list_file, length=(3, 30)):
         RandCorpusCfg(
             chars_file=CHAR_DIR / f"latin.txt",
             length=length,
+            char_spacing=CHAR_SPACING,
             font_dir=FONT_DIR,
             font_list_file=font_list_file,
             font_size=FONT_SIZE,

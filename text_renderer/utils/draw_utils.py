@@ -55,8 +55,8 @@ def draw_text_on_bg(
     for c in font_text.text:
         # Use getbbox() instead of deprecated getsize()
         bbox = font_text.font.getbbox(c)
-        if bbox[2] > bbox[0] and bbox[3] > bbox[1]:  # Valid bbox
-            size = (bbox[2] - bbox[0], bbox[3] - bbox[1])
+        if bbox[2] > bbox[0]:
+            size = (bbox[2] - bbox[0], max(bbox[3] - bbox[1], font_text.font.size))
         else:
             # Fallback for empty or invalid bbox
             size = (0, font_text.font.size)
@@ -74,12 +74,19 @@ def draw_text_on_bg(
     char_spacings = []
 
     cs_height = font_text.size[1]
+
+    if isinstance(char_spacing, list) or isinstance(char_spacing, tuple):
+        sample_spacing = np.random.uniform(*char_spacing)
+        sample_spacing_pixels = int(sample_spacing * cs_height)
+    else:
+        sample_spacing_pixels = int(char_spacing * cs_height)
+
     for i in range(len(font_text.text)):
-        if isinstance(char_spacing, list) or isinstance(char_spacing, tuple):
-            s = np.random.uniform(*char_spacing)
-            char_spacings.append(int(s * cs_height))
+        char = font_text.text[i]
+        if char.isspace():
+            char_spacings.append(0)
         else:
-            char_spacings.append(int(char_spacing * cs_height))
+            char_spacings.append(sample_spacing_pixels)
 
     if font_text.horizontal:
         width += sum(char_spacings[:-1])
