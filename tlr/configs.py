@@ -5,7 +5,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 
 # from make_per_language_char_set import latin_languages
-latin_languages = ['en', 'de']
+latin_languages = ['en', 'de'] + ['math', 'bash']
 
 from text_renderer.config import (
     GeneratorCfg,
