@@ -348,12 +348,6 @@ class TLR(AlbumentationsEffect):
                 A.GaussianBlur(blur_limit=(1, 3), p=1.0),
                 A.MotionBlur(blur_limit=(3, 5), p=1.0),
                 A.Lambda(image=per_channel_coarse_dropout, p=1.0),
-                A.SaltAndPepper(
-                    noise_ratio=(0.01, 0.1),
-                    salt_vs_pepper=(0.5, 0.5),
-                    per_channel=True,
-                    p=1.0,
-                ),
                 A.InvertImg(p=1.0),
                 A.NoOp(p=1.0),
             ],
