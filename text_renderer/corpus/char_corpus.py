@@ -58,7 +58,9 @@ class CharCorpus(Corpus):
 
             logger.info(f"load: {p}")
             with open(p, "r", encoding="utf-8") as f:
-                self.text += "".join(f.readlines())
+                if self.text:  # Add space between files if text already exists
+                    self.text += " "
+                self.text += " ".join(line.strip() for line in f.readlines())
 
         if self.cfg.chars_file is not None:
             self.font_manager.update_font_support_chars(self.cfg.chars_file)

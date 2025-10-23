@@ -55,7 +55,10 @@ class WordCorpus(Corpus):
         for text_path in self.cfg.text_paths:
             with open(text_path, "r", encoding="utf-8") as f:
                 text = f.read()
-                texts.append(text.strip())
+                text = ' '.join(
+                    line.strip() for line in text.splitlines() if line.strip()
+                )
+                texts.append(text)
 
         if self.cfg.chars_file is not None:
             self.font_manager.update_font_support_chars(self.cfg.chars_file)
