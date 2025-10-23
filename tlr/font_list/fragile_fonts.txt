@@ -13,7 +13,6 @@ Arial.ttf
 Arsenal-Italic.ttf
 AsapCondensed-Light.ttf
 AsapCondensed-LightItalic.ttf
-AtomicAge-Regular.ttf
 AzeretMono-Italic[wght].ttf
 AzeretMono[wght].ttf
 B612Mono-Italic.ttf
@@ -23,18 +22,18 @@ BaiJamjuree-Regular.ttf
 BalooDa2[wght].ttf
 BalooThambi2[wght].ttf
 Barlow-Light.ttf
+BarlowCondensed-Black.ttf
 BarlowCondensed-BlackItalic.ttf
 BarlowCondensed-BoldItalic.ttf
 BarlowCondensed-ExtraLight.ttf
 BarlowCondensed-ThinItalic.ttf
 BarlowSemiCondensed-Black.ttf
-Baskervville-Regular.ttf
 Bellota-Regular.ttf
 Bentham-Regular.ttf
 BigelowRules-Regular.ttf
+BigShouldersInlineText[wght].ttf
 BioRhymeExpanded-ExtraBold.ttf
 BioRhymeExpanded-ExtraLight.ttf
-Bitstream Vera Sans Mono.ttf
 Bitstream Vera Sans Mono.ttf
 BreeSerif-Regular.ttf
 Brygada1918-Italic[wght].ttf
@@ -47,6 +46,7 @@ CharisSIL-Italic.ttf
 Charmonman-Regular.ttf
 Chewy-Regular.ttf
 ChivoMono-Italic[wght].ttf
+Corben-Bold.ttf
 CormorantInfant-BoldItalic.ttf
 CormorantInfant-Italic.ttf
 CormorantInfant-Light.ttf
@@ -68,8 +68,6 @@ DMMono-MediumItalic.ttf
 DMMono-Regular.ttf
 DMSans-Medium.ttf
 Droid Sans Mono.ttf
-Droid Sans Mono.ttf
-DroidSansMono.ttf
 DroidSansMono.ttf
 EduTASBeginner[wght].ttf
 EkMukta-Light.ttf
@@ -92,10 +90,12 @@ Forum-Regular.ttf
 FragmentMono-Italic.ttf
 FragmentMono-Regular.ttf
 Gabriela-Regular.ttf
+Gaegu-Bold.ttf
 Gaegu-Light.ttf
 GentiumBookPlus-Bold.ttf
 GentiumBookPlus-BoldItalic.ttf
 GentiumBookPlus-Italic.ttf
+Georama[wdth,wght].ttf
 GlassAntiqua-Regular.ttf
 Glegoo-Bold.ttf
 GothicA1-ExtraLight.ttf
@@ -111,9 +111,7 @@ helvetica_neue_bold_italic.ttf
 helvetica_neue_normal.ttf
 HelveticaNeue Light.ttf
 HelveticaNeue Thin.ttf
-HelveticaNeue Thin.ttf
 HelveticaNeue.ttf
-HelveticaNeueIt.ttf
 HelveticaNeueIt.ttf
 HelveticaNeueLt.ttf
 Hind-Light.ttf
@@ -134,6 +132,7 @@ IBMPlexSansArabic-Regular.ttf
 IBMPlexSansCondensed-MediumItalic.ttf
 Inconsolata-SemiExpanded.ttf
 Inconsolata-UltraCondensedBlack.ttf
+Inconsolata-UltraCondensedSemiBold.ttf
 Inconsolata-UltraExpandedLight.ttf
 Inconsolata-UltraExpandedMedium.ttf
 Inconsolata.otf
@@ -148,7 +147,6 @@ IstokWeb-Italic.ttf
 Itim-Regular.ttf
 JetBrainsMono-Italic[wght].ttf
 JetBrainsMono[wght].ttf
-Jua-Regular.ttf
 KaiseiDecol-Regular.ttf
 KaiseiOpti-Regular.ttf
 KaiseiTokumin-ExtraBold.ttf
@@ -166,7 +164,6 @@ Laila-Medium.ttf
 Lateef-ExtraBold.ttf
 Lato-Italic.ttf
 Lato-LightItalic.ttf
-Lato-Thin.ttf
 LeagueGothic[wdth].ttf
 LibreBodoni[wght].ttf
 LifeSavers-ExtraBold.ttf
@@ -184,8 +181,8 @@ Merriweather-Bold.ttf
 Merriweather-Regular.ttf
 MerriweatherSans[wght].ttf
 Mirza-Regular.ttf
+Mitr-Bold.ttf
 Mitr-Regular.ttf
-MontserratAlternates-Thin.ttf
 MPLUS1Code[wght].ttf
 MuktaMahee-Regular.ttf
 Mulish[wght].ttf
@@ -193,9 +190,6 @@ NanumMyeongjo-Bold.ttf
 NewRocker-Regular.ttf
 NewTegomin-Regular.ttf
 Nokora-Regular.ttf
-NovaCut.ttf
-NovaFlat.ttf
-NovaMono.ttf
 NTR-Regular.ttf
 Numans-Regular.ttf
 OCR-B.ttf
@@ -206,14 +200,16 @@ Outfit[wght].ttf
 OverpassMono[wght].ttf
 OxygenMono-Regular.ttf
 PadyakkeExpandedOne-Regular.ttf
+PassionOne-Black.ttf
+PassionOne-Bold.ttf
 Pavanam-Regular.ttf
 Philosopher-Bold.ttf
 PoltawskiNowy-Italic[wght].ttf
+PostNoBillsColombo-Bold.ttf
 PostNoBillsColombo-Medium.ttf
 Prompt-ExtraLight.ttf
 Prompt-MediumItalic.ttf
 Prompt-ThinItalic.ttf
-PT Mono.ttf
 PT Mono.ttf
 PT_Serif-Caption-Web-Italic.ttf
 Puritan-Bold.ttf
@@ -234,7 +230,6 @@ RobotoSerif-Italic[GRAD,opsz,wdth,wght].ttf
 RopaSans-Italic.ttf
 Rosario-Italic[wght].ttf
 Rosarivo-Regular.ttf
-RubikIso-Regular.ttf
 RubikMaze-Regular.ttf
 RubikMicrobe-Regular.ttf
 SairaExtraCondensed-Thin.ttf
@@ -243,7 +238,6 @@ Sansita-Regular.ttf
 SansitaOne-Regular.ttf
 Sarabun-ExtraLightItalic.ttf
 Sarabun-Italic.ttf
-Sarpanch-SemiBold.ttf
 SeymourOne-Regular.ttf
 ShareTechMono-Regular.ttf
 SometypeMono-Italic.ttf
@@ -277,11 +271,9 @@ Tinos-Italic.ttf
 Tinos-Regular.ttf
 TiroBangla-Regular.ttf
 TiroTamil-Regular.ttf
-tomhand.ttf
-Tourney[wdth,wght].ttf
+Tomorrow-BlackItalic.ttf
 Trirong-Thin.ttf
 Ubuntu Mono Bold.ttf
-Ubuntu Mono.ttf
 Ubuntu Mono.ttf
 UbuntuCondensed-Regular.ttf
 UbuntuMono-Italic.ttf
@@ -296,19 +288,3 @@ Yantramanav-Thin.ttf
 Yrsa-Italic[wght].ttf
 ZenKakuGothicAntique-Light.ttf
 ZenKakuGothicNew-Bold.ttf
-AlegreyaSans-BlackItalic.ttf
-Inconsolata-UltraCondensedBlack.ttf
-Tomorrow-BlackItalic.ttf
-PassionOne-Black.ttf
-BarlowCondensed-Black.ttf
-Inconsolata-UltraCondensedSemiBold.ttf
-Corben-Bold.ttf
-Mitr-Bold.ttf
-PostNoBillsColombo-Bold.ttf
-Gaegu-Bold.ttf
-PassionOne-Bold.ttf
-Tourney[wdth,wght].ttf
-Anybody[wdth,wght].ttf
-Handjet[ELGR,ELSH,wght].ttf
-BigShouldersInlineText[wght].ttf
-Georama[wdth,wght].ttf

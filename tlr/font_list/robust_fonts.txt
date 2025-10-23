@@ -3,18 +3,20 @@ Alatsi-Regular.ttf
 Alkatra[wght].ttf
 Amaranth-BoldItalic.ttf
 Andika-Bold.ttf
+Anton-Regular.ttf
 Arial Bold.ttf
 arial_bold_normal.ttf
 B612Mono-Bold.ttf
 B612Mono-BoldItalic.ttf
 BalsamiqSans-Bold.ttf
 Barlow-SemiBoldItalic.ttf
+BarlowCondensed-BlackItalic.ttf
 Battambang-Black.ttf
 BeVietnamPro-SemiBold.ttf
 Bitstream Vera Sans Mono Bold.ttf
-Bitstream Vera Sans Mono Bold.ttf
+BlackOpsOne-Regular.ttf
+Blinker-Black.ttf
 Caladea-Bold.ttf
-ChivoMono[wght].ttf
 CourierPrime-BoldItalic.ttf
 Cousine-BoldItalic.ttf
 DarkerGrotesque-Black.ttf
@@ -46,6 +48,7 @@ Kadwa-Regular.ttf
 Kanit-BoldItalic.ttf
 Khula-SemiBold.ttf
 Livvic-Black.ttf
+LondrinaSolid-Black.ttf
 MartianMono[wdth,wght].ttf
 MonomaniacOne-Regular.ttf
 Mukta-ExtraBold.ttf
@@ -78,15 +81,3 @@ UbuntuMono-Bold.ttf
 UbuntuMono-BoldItalic.ttf
 WixMadeforText-Bold.ttf
 WixMadeforText-BoldItalic.ttf
-Anton-Regular.ttf
-Prompt-BlackItalic.ttf
-LondrinaSolid-Black.ttf
-Livvic-Black.ttf
-FiraSansCondensed-Black.ttf
-TitilliumWeb-Black.ttf
-BarlowCondensed-BlackItalic.ttf
-MontserratAlternates-Black.ttf
-Blinker-Black.ttf
-BlackOpsOne-Regular.ttf
-HelveticaNeue BlackCond.ttf
-MontserratAlternates-Bold.ttf
