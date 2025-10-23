@@ -463,13 +463,13 @@ def generate_all_configs():
     num_images = 10**6
 
     all_configs = []
-    all_configs.extend(generate_basic_configs(get_num_images(num_images, 0.3)))
-    all_configs.extend(generate_mixed_style_configs(get_num_images(num_images, 0.3)))
+    all_configs.extend(generate_basic_configs(get_num_images(num_images, 0.4)))
+    # all_configs.extend(generate_mixed_style_configs(get_num_images(num_images, 0.3)))
     all_configs.extend(
-        generate_with_adjacent_line_configs(get_num_images(num_images, 0.3))
+        generate_with_adjacent_line_configs(get_num_images(num_images, 0.4))
     )
-    all_configs.extend(generate_hard_bg_configs(get_num_images(num_images, 0.1)))
-    all_configs.extend(generate_extreme_fonts_configs(get_num_images(num_images, 0.05)))
+    all_configs.extend(generate_hard_bg_configs(get_num_images(num_images, 0.2)))
+    # all_configs.extend(generate_extreme_fonts_configs(get_num_images(num_images, 0.05)))
 
     all_configs.extend(generate_validation_configs(100))
 
