@@ -113,7 +113,12 @@ def base_cfg(
             perspective_transform=perspective_transform,
             gray=gray,
             layout_effects=layout_effects,
-            render_effects=Effects(TLR()),
+            render_effects=Effects(
+                [
+                    Line(0.5, color_cfg=SimpleTextColorCfg()),
+                    TLR(),
+                ]
+            ),
             layout=layout,
             corpus=corpus,
             corpus_effects=corpus_effects,
@@ -213,7 +218,6 @@ def generate_basic_configs(num_images):
                 corpus=corpus,
                 layout_effects=Effects(
                     [
-                        Line(0.5, color_cfg=SimpleTextColorCfg()),
                         OneOf(
                             [
                                 DropoutRand(),
@@ -248,7 +252,6 @@ def generate_mixed_style_configs(num_images):
                     Effects([Padding(p=0.3, w_ratio=[0, 0.01]), DropoutRand(p=0.2)]),
                     Effects([Padding(p=0.3, w_ratio=[0, 0.01]), DropoutRand(p=0.2)]),
                 ],
-                layout_effects=Effects(Line(p=0.5)),
                 num_images=get_num_images(num_images, w),
             )
         )
@@ -273,7 +276,6 @@ def generate_with_adjacent_line_configs(num_images):
                     Effects([Padding(p=0.9), DropoutRand(p=0.2)]),
                     NoEffects(),
                 ],
-                layout_effects=Effects(Line(p=0.5)),
                 num_images=get_num_images(num_images, w),
             )
         )
@@ -295,7 +297,6 @@ def generate_hard_bg_configs(num_images):
                 corpus=corpus,
                 corpus_effects=Effects(
                     [
-                        Line(0.5, color_cfg=SimpleTextColorCfg()),
                         DropoutRand(p=0.5),
                         Padding(p=0.9, w_ratio=[0.1, 0.2], h_ratio=[0.1, 0.2]),
                     ]
@@ -335,7 +336,6 @@ def generate_extreme_fonts_configs(num_images):
                 corpus=corpus,
                 layout_effects=Effects(
                     [
-                        Line(0.5, color_cfg=SimpleTextColorCfg()),
                         OneOf(
                             [
                                 DropoutRand(),
@@ -366,7 +366,6 @@ def generate_validation_configs(num_images):
             corpus=corpus,
             layout_effects=Effects(
                 [
-                    Line(0.5, color_cfg=SimpleTextColorCfg()),
                     OneOf(
                         [
                             DropoutRand(),
@@ -390,7 +389,6 @@ def generate_validation_configs(num_images):
                 Effects([Padding(p=0.3, w_ratio=[0, 0.01]), DropoutRand(p=0.2)]),
                 Effects([Padding(p=0.3, w_ratio=[0, 0.01]), DropoutRand(p=0.2)]),
             ],
-            layout_effects=Effects(Line(p=0.5)),
             num_images=get_num_images(num_images, w),
         )
     )
@@ -404,7 +402,6 @@ def generate_validation_configs(num_images):
                 Effects([Padding(p=0.9), DropoutRand(p=0.2)]),
                 NoEffects(),
             ],
-            layout_effects=Effects(Line(p=0.5)),
             num_images=get_num_images(num_images, w),
         )
     )
@@ -416,7 +413,6 @@ def generate_validation_configs(num_images):
             corpus=corpus,
             corpus_effects=Effects(
                 [
-                    Line(0.5, color_cfg=SimpleTextColorCfg()),
                     DropoutRand(p=0.5),
                     Padding(p=0.9, w_ratio=[0.1, 0.2], h_ratio=[0.1, 0.2]),
                 ]
