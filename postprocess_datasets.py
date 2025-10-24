@@ -2,17 +2,17 @@
 
 import math
 import os
-import shutil
 import zipfile
 from pathlib import Path
-from typing import List, Tuple
+from typing import List
 
 import click
+import cv2 as cv
 
 SHARD_SIZE = 1000
 
 
-def get_image_files(images_dir: Path) -> List[Tuple[str, Path]]:
+def get_image_files(images_dir: Path) -> List[Path]:
     image_files = []
     for img_file in sorted(images_dir.glob("*.jpg")):
         image_files.append(img_file)
@@ -28,8 +28,28 @@ def create_archive(dataset_dir: Path, archive_path: Path):
                 zf.write(file_path, arc_name)
 
 
-def shard_dataset(ds: Path):
+def split_on_image_and_mask(
+    image_path: Path, shard_images_dir: Path, shard_masks_dir: Path
+):
+    img = cv.imread(str(image_path))
+    _, w = img.shape[:2]
+    assert w % 3 == 0, f"Image width is not divisible by 3: {image_path=}, {img.shape=}"
+
+    image = img[:, : w // 3]
+    mask = img[:, 2 * w // 3 :]
+    assert (
+        image.shape == mask.shape
+    ), f"Image and mask shapes do not match: {image.shape=}, {mask.shape=}"
+    mask = cv.cvtColor(mask, cv.COLOR_BGR2GRAY)
+
+    cv.imwrite(str(shard_images_dir / image_path.name), image)
+    cv.imwrite(str(shard_masks_dir / image_path.name), mask)
+    image_path.unlink()
+
+
+def process_dataset(ds: Path):
     images_dir = ds / "images"
+    masks_dir = ds / "masks"
     labels_file = ds / "labels.json"
 
     if not images_dir.exists() or not labels_file.exists():
@@ -50,11 +70,14 @@ def shard_dataset(ds: Path):
         end_idx = min(start_idx + SHARD_SIZE, total_images)
         shard_images = image_files[start_idx:end_idx]
 
-        shard_dir = images_dir / f"{shard_idx:05d}"
-        shard_dir.mkdir(exist_ok=True)
+        shard_images_dir = images_dir / f"{shard_idx:05d}"
+        shard_images_dir.mkdir(exist_ok=True)
+
+        shard_masks_dir = masks_dir / f"{shard_idx:05d}"
+        shard_masks_dir.mkdir(parents=True, exist_ok=True)
 
         for image_path in shard_images:
-            shutil.move(str(image_path), str(shard_dir / image_path.name))
+            split_on_image_and_mask(image_path, shard_images_dir, shard_masks_dir)
 
     archive_path = ds.parent / f"{ds.name}.zip"
     create_archive(ds, archive_path)
@@ -70,7 +93,7 @@ def shard_dataset(ds: Path):
 )
 def main(datasets, input_dir: Path):
     if not input_dir.exists():
-        return
+        raise FileNotFoundError(f"Input directory does not exist: {input_dir}")
 
     dataset_paths = [p for p in input_dir.iterdir() if p.is_dir()]
     if datasets:
@@ -79,15 +102,13 @@ def main(datasets, input_dir: Path):
                 raise FileNotFoundError(
                     f"Dataset '{ds}' does not exist in '{input_dir}'. Available datasets: {[p.name for p in dataset_paths]}"
                 )
-                return
         dataset_paths = [input_dir / d for d in datasets if (input_dir / d).exists()]
 
     if not dataset_paths:
         raise FileNotFoundError("No datasets found to process.")
-        return
 
     for dataset_path in sorted(dataset_paths):
-        shard_dataset(dataset_path)
+        process_dataset(dataset_path)
 
 
 if __name__ == '__main__':

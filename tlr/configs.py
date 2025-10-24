@@ -118,6 +118,7 @@ def base_cfg(
             corpus=corpus,
             corpus_effects=corpus_effects,
             height=40,
+            return_bg_and_mask=True,
         ),
     )
 

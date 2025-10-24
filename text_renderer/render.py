@@ -359,6 +359,8 @@ class Render:
         if self.cfg.height != -1 and self.cfg.height != image.shape[0]:
             height, width = image.shape[:2]
             width = int(width // (height / self.cfg.height))
+            if self.cfg.return_bg_and_mask:
+                width = int(width // (height / self.cfg.height)) // 3 * 3
             image = cv2.resize(
                 image, (width, self.cfg.height), interpolation=cv2.INTER_CUBIC
             )
