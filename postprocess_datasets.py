@@ -9,6 +9,8 @@ from typing import List
 import click
 import cv2 as cv
 
+import render_config as config
+
 SHARD_SIZE = 1000
 
 
@@ -74,10 +76,15 @@ def process_dataset(ds: Path):
         shard_images_dir.mkdir(exist_ok=True)
 
         shard_masks_dir = masks_dir / f"{shard_idx:05d}"
-        shard_masks_dir.mkdir(parents=True, exist_ok=True)
+        if config.RENDER_MASK:
+            shard_masks_dir.mkdir(parents=True, exist_ok=True)
 
         for image_path in shard_images:
-            split_on_image_and_mask(image_path, shard_images_dir, shard_masks_dir)
+            if config.RENDER_MASK:
+                split_on_image_and_mask(image_path, shard_images_dir, shard_masks_dir)
+            else:
+                new_image_path = shard_images_dir / image_path.name
+                image_path.rename(new_image_path)
 
     archive_path = ds.parent / f"{ds.name}.zip"
     create_archive(ds, archive_path)

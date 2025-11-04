@@ -4,6 +4,8 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
 
+import render_config as config
+
 # from make_per_language_char_set import latin_languages
 latin_languages = ['en', 'de'] + ['math', 'bash']
 
@@ -101,7 +103,6 @@ def base_cfg(
     corpus_effects=None,
     layout_effects=None,
     layout=None,
-    gray=False,
     num_images=50,
     bg_dir=BG_SIMPLE_DIR,
 ):
@@ -111,7 +112,7 @@ def base_cfg(
         render_cfg=RenderCfg(
             bg_dir=bg_dir,
             perspective_transform=perspective_transform,
-            gray=gray,
+            gray=False,
             layout_effects=layout_effects,
             render_effects=Effects(
                 [
@@ -123,7 +124,7 @@ def base_cfg(
             corpus=corpus,
             corpus_effects=corpus_effects,
             height=40,
-            return_bg_and_mask=True,
+            return_bg_and_mask=render_config.RENDER_MASK,
         ),
     )
 
