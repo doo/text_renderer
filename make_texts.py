@@ -1,5 +1,6 @@
 import random
 import re
+import string
 import time
 from pathlib import Path
 from typing import Dict, List
@@ -151,7 +152,7 @@ def delete_sequences_of_whitespaces(path: Path) -> None:
         print(f"Failed to delete sequences of whitespaces in file {path}: {e}")
 
 
-def augment_texts(path: Path) -> None:
+def add_caps(path: Path) -> None:
     try:
         with open(path, 'r', encoding='utf-8') as f:
             lines = f.readlines()
@@ -174,12 +175,54 @@ def augment_texts(path: Path) -> None:
         print(f"Failed to augment texts in file {path}: {e}")
 
 
+def add_bullets_and_vertical_lines(path: Path) -> None:
+    bullets = '•●*'
+    vertical_lines = '|│❘'
+    hyphens = '-—−–‒‑־'
+
+    with open(path, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+
+    with open(path, 'w', encoding='utf-8') as f:
+        for line in lines:
+            p = random.random()
+            if p < 0.1:
+                start_sign = bullets + hyphens
+                suffix = (
+                    random.choice(start_sign) + ' ' if random.random() < 0.5 else ''
+                )
+                f.write(f"{suffix}{line}")
+            elif p < 0.2:
+                word_separators = bullets + vertical_lines + hyphens
+                prefix_suffix_signes = bullets + hyphens
+                words = line.split()
+                modified_words = []
+                prefix_suffix_flag = random.random() < 0.5
+                for word in words:
+                    if random.random() < 0.3:
+                        modified_words.append(random.choice(word_separators))
+
+                    prefix = ''
+                    suffix = ''
+                    if prefix_suffix_flag:
+                        if random.random() < 0.3:
+                            prefix = random.choice(prefix_suffix_signes)
+                        if random.random() < 0.3:
+                            suffix = random.choice(prefix_suffix_signes)
+
+                    modified_words.append(f"{prefix}{word}{suffix}")
+                f.write(' '.join(modified_words) + '\n')
+            else:
+                f.write(line)
+
+
 def main() -> None:
     for language in tqdm(languages, desc="Processing languages"):
         process_language(language)
         delete_empty_lines_in_file(make_language_text_file(language))
         delete_sequences_of_whitespaces(make_language_text_file(language))
-        augment_texts(make_language_text_file(language))
+        add_caps(make_language_text_file(language))
+        add_bullets_and_vertical_lines(make_language_text_file(language))
 
 
 if __name__ == "__main__":
