@@ -43,7 +43,11 @@ blacklist = [
     b'\\u1c86',
 ]
 
-common = ' ' + string.digits + string.punctuation
+punctuation = string.punctuation + '…'
+currency = '€£$¢'
+sign = '°±™¶§ⓇⒸⓒ®©'
+other = '•●|│❘⋮—−–‒‑־'
+common = ' ' + string.digits + punctuation + currency + sign + other
 
 
 def get_exemplars(localeID, extype='main', option=2):
