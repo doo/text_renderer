@@ -9,7 +9,7 @@ from typing import List
 import click
 import cv2 as cv
 
-import render_config as config
+from render_config import RENDER_MASK
 
 SHARD_SIZE = 1000
 
@@ -76,11 +76,11 @@ def process_dataset(ds: Path):
         shard_images_dir.mkdir(exist_ok=True)
 
         shard_masks_dir = masks_dir / f"{shard_idx:05d}"
-        if config.RENDER_MASK:
+        if RENDER_MASK:
             shard_masks_dir.mkdir(parents=True, exist_ok=True)
 
         for image_path in shard_images:
-            if config.RENDER_MASK:
+            if RENDER_MASK:
                 split_on_image_and_mask(image_path, shard_images_dir, shard_masks_dir)
             else:
                 new_image_path = shard_images_dir / image_path.name
