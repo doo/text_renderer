@@ -206,7 +206,7 @@ def generate_basic_configs(num_images):
                 corpus=corpus,
                 layout_effects=Effects(
                     [
-                        Padding(p=0.9, w_ratio=[0.1, 0.2], h_ratio=[0.1, 0.2]),
+                        Padding(p=0.5, w_ratio=[0, 0.2], h_ratio=[0, 0.2]),
                     ]
                 ),
                 num_images=get_num_images(num_images, w / 2),
