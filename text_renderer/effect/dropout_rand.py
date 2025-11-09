@@ -42,6 +42,6 @@ class DropoutRand(Effect):
             y, x = nonzero_idxes[i]
             col = int(x)
             row = int(y)
-            self.rand_pick(pim, col, row)
+            self.fix_pick(pim, col, row, [0, 1])
 
         return img, text_bbox
