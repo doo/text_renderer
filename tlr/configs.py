@@ -186,9 +186,9 @@ def get_rand_corpus(font_list_file, length=(3, 30)):
 
 
 CORPUS_FUNCTIONS = {
-    'slice': (0.45, get_slice_corpus),
-    'word': (0.45, get_word_corpus),
-    'rand': (0.1, get_rand_corpus),
+    'slice': (0.5, get_slice_corpus),
+    'word': (0.5, get_word_corpus),
+    # 'rand': (0.1, get_rand_corpus),
 }
 
 
