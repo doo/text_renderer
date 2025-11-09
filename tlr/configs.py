@@ -458,7 +458,7 @@ def generate_per_font_configs():
 
 
 def generate_all_configs():
-    num_images = 10**6
+    num_images = 3 * 10**6
 
     all_configs = []
     all_configs.extend(generate_basic_configs(get_num_images(num_images, 0.4)))
