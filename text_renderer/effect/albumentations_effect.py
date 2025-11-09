@@ -345,8 +345,8 @@ class TLR(AlbumentationsEffect):
     def __init__(self, p=1.0):
         transform = A.OneOf(
             [
-                A.GaussianBlur(blur_limit=(1, 3), p=1.0),
-                A.MotionBlur(blur_limit=(3, 5), p=1.0),
+                A.GaussianBlur(blur_limit=(1, 5), p=1.0),
+                A.MotionBlur(blur_limit=(3, 7), p=1.0),
                 A.Lambda(image=per_channel_coarse_dropout, p=1.0),
                 A.InvertImg(p=1.0),
                 A.NoOp(p=1.0),
