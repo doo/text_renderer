@@ -226,7 +226,7 @@ def generate_basic_configs(num_images):
                                 DropoutHorizontal(thickness=1),
                             ]
                         ),
-                        Padding(p=0.9, w_ratio=[0.1, 0.2], h_ratio=[0.1, 0.2]),
+                        Padding(p=0.9, w_ratio=[0, 0.2], h_ratio=[0, 0.2]),
                     ]
                 ),
                 num_images=get_num_images(num_images, w / 2),
@@ -299,7 +299,7 @@ def generate_hard_bg_configs(num_images):
                 corpus_effects=Effects(
                     [
                         DropoutRand(p=0.5),
-                        Padding(p=0.9, w_ratio=[0.1, 0.2], h_ratio=[0.1, 0.2]),
+                        Padding(p=0.9, w_ratio=[0, 0.2], h_ratio=[0, 0.2]),
                     ]
                 ),
                 bg_dir=BG_DIR,
