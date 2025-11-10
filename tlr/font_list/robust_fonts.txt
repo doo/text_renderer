@@ -6,6 +6,7 @@ Andika-Bold.ttf
 Anton-Regular.ttf
 Arial Bold.ttf
 arial_bold_normal.ttf
+arial_bold.ttf
 B612Mono-Bold.ttf
 B612Mono-BoldItalic.ttf
 BalsamiqSans-Bold.ttf
@@ -16,7 +17,10 @@ BeVietnamPro-SemiBold.ttf
 Bitstream Vera Sans Mono Bold.ttf
 BlackOpsOne-Regular.ttf
 Blinker-Black.ttf
+CabinSketch-Bold.ttf
 Caladea-Bold.ttf
+Chunk.otf
+ChunkFivePrint.otf
 CourierPrime-BoldItalic.ttf
 Cousine-BoldItalic.ttf
 DarkerGrotesque-Black.ttf
@@ -40,11 +44,18 @@ HindJalandhar-Bold.ttf
 IBMPlexMono-Bold.ttf
 IBMPlexMono-BoldItalic.ttf
 IBMPlexMono-SemiBold.ttf
+IBMPlexMono-SemiBoldItalic.ttf
 IBMPlexSansArabic-SemiBold.ttf
 IBMPlexSansJP-Bold.ttf
+Inconsolata-Black.ttf
+Inconsolata-ExpandedExtraBold.ttf
+Inconsolata-ExtraBold.ttf
+Inconsolata-ExtraExpandedBlack.ttf
+Inconsolata-SemiCondensedBlack.ttf
 K2D-SemiBold.ttf
 Kadwa-Bold.ttf
 Kadwa-Regular.ttf
+Kalam-Bold.ttf
 Kanit-BoldItalic.ttf
 Khula-SemiBold.ttf
 Livvic-Black.ttf
@@ -57,6 +68,15 @@ MuktaMalar-SemiBold.ttf
 MuktaVaani-SemiBold.ttf
 Niramit-Medium.ttf
 PalanquinDark-Medium.ttf
+Poppins-Black.ttf
+Poppins-BlackItalic.ttf
+Poppins-Bold.ttf
+Poppins-BoldItalic.ttf
+Poppins-ExtraBold.ttf
+Poppins-ExtraBoldItalic.ttf
+Poppins-Medium.ttf
+Poppins-MediumItalic.ttf
+Poppins-SemiBoldItalic.ttf
 Prompt-BlackItalic.ttf
 Quantico-Bold.ttf
 RacingSansOne-Regular.ttf
@@ -65,9 +85,11 @@ SairaCondensed-SemiBold.ttf
 SairaSemiCondensed-Black.ttf
 Share-Bold.ttf
 ShipporiAntiqueB1-Regular.ttf
+Shrikhand-Regular.ttf
 Solway-ExtraBold.ttf
 SometypeMono-Bold.ttf
 SometypeMono-BoldItalic.ttf
+Source Code Pro Semibold.otf
 SourceSansPro-BlackItalic.ttf
 SpaceMono-Bold.ttf
 SpaceMono-BoldItalic.ttf
@@ -79,5 +101,7 @@ TitilliumWeb-Bold.ttf
 Ubuntu Mono Bold.ttf
 UbuntuMono-Bold.ttf
 UbuntuMono-BoldItalic.ttf
+Ultra-Regular.ttf
 WixMadeforText-Bold.ttf
 WixMadeforText-BoldItalic.ttf
+ZenDots-Regular.ttf

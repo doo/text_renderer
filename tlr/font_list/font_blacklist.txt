@@ -1,5 +1,6 @@
 AlegreyaSC-Black.ttf
 AtomicAge-Regular.ttf
+Bangers-Regular.ttf
 Baskervville-Regular.ttf
 ChivoMono[wght].ttf
 CinzelDecorative-Black.ttf
@@ -154,9 +155,11 @@ NovaCut.ttf
 NovaFlat.ttf
 NovaMono.ttf
 OdorMeanChey-Regular.ttf
+PermanentMarker-Regular.ttf
 Phetsarath-Bold.ttf
 Phetsarath-Regular.ttf
 Phudu[wght].ttf
+RockSalt-Regular.ttf
 RubikIso-Regular.ttf
 RubikMonoOne-Regular.ttf
 RuslanDisplay.ttf
