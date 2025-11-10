@@ -8,7 +8,7 @@ from typing import Dict, List
 import requests
 from tqdm import tqdm
 
-from make_per_language_char_set import languages
+from make_per_language_char_set import currency, languages
 
 N_ARTICLES = 300
 DELAY_BETWEEN_REQUESTS = 1
@@ -175,10 +175,78 @@ def add_caps(path: Path) -> None:
         print(f"Failed to augment texts in file {path}: {e}")
 
 
+def add_sequences_of_whitespaces(path: Path) -> None:
+    with open(path, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+
+    with open(path, 'w', encoding='utf-8') as f:
+        for line in lines:
+            if random.random() < 0.1:
+                words = line.split()
+                if random.random() < 0.5:
+                    words = [' ' * random.randint(1, 8)] + words
+                if random.random() < 0.5:
+                    words = words + [' ' * random.randint(1, 8)]
+                separator = ' ' * random.randint(2, 8)
+
+                line = separator.join(words) + '\n'
+            f.write(line)
+
+
+def get_random_float() -> str:
+    f = random.uniform(0, 1)
+    f *= 10 ** random.randint(0, 5)
+    precision = random.randint(0, 3)
+    f = round(f, precision)
+
+    if random.random() < 0.5:
+        f = int(f)
+
+    cur = random.choice(currency) if random.random() < 0.5 else ''
+
+    if random.random() < 0.5:
+        s = cur + str(f)
+    else:
+        s = str(f) + cur
+
+    return s
+
+
 def add_bullets_and_vertical_lines(path: Path) -> None:
     bullets = '•●*'
     vertical_lines = '|│❘'
     hyphens = '-—−–‒‑־'
+
+    line_starts = bullets + hyphens + '>'
+    word_prefixes = '<\'"([{' + bullets + hyphens
+    word_suffixes = '>\'")]}…' + bullets + hyphens
+
+    mapping = {
+        "RANDOM_FLOAT": get_random_float,
+    }
+    extra_words = (
+        [
+            '->',
+            '<-',
+            '=>',
+            '<=',
+            '--',
+            '---',
+            '..',
+            '...',
+            '***',
+            '-->',
+            '--->',
+            '<--',
+            '<---',
+            '>>',
+            '>>>',
+            '<<',
+            '<<<',
+        ]
+        + list(bullets + vertical_lines + hyphens)
+        + list(mapping.keys())
+    )
 
     with open(path, 'r', encoding='utf-8') as f:
         lines = f.readlines()
@@ -187,28 +255,28 @@ def add_bullets_and_vertical_lines(path: Path) -> None:
         for line in lines:
             p = random.random()
             if p < 0.1:
-                start_sign = bullets + hyphens
                 suffix = (
-                    random.choice(start_sign) + ' ' if random.random() < 0.5 else ''
+                    random.choice(line_starts) + ' ' if random.random() < 0.5 else ''
                 )
                 f.write(f"{suffix}{line}")
-            elif p < 0.2:
-                word_separators = bullets + vertical_lines + hyphens
-                prefix_suffix_signes = bullets + hyphens
+            elif p < 0.3:
                 words = line.split()
                 modified_words = []
                 prefix_suffix_flag = random.random() < 0.5
                 for word in words:
                     if random.random() < 0.3:
-                        modified_words.append(random.choice(word_separators))
+                        extra_word = random.choice(extra_words)
+                        if extra_word in mapping:
+                            extra_word = mapping[extra_word]()
+                        modified_words.append(extra_word)
 
                     prefix = ''
                     suffix = ''
                     if prefix_suffix_flag:
                         if random.random() < 0.3:
-                            prefix = random.choice(prefix_suffix_signes)
+                            prefix = random.choice(word_prefixes)
                         if random.random() < 0.3:
-                            suffix = random.choice(prefix_suffix_signes)
+                            suffix = random.choice(word_suffixes)
 
                     modified_words.append(f"{prefix}{word}{suffix}")
                 f.write(' '.join(modified_words) + '\n')
@@ -218,11 +286,13 @@ def add_bullets_and_vertical_lines(path: Path) -> None:
 
 def main() -> None:
     for language in tqdm(languages, desc="Processing languages"):
-        process_language(language)
+        # process_language(language)
         delete_empty_lines_in_file(make_language_text_file(language))
         delete_sequences_of_whitespaces(make_language_text_file(language))
+
         add_caps(make_language_text_file(language))
         add_bullets_and_vertical_lines(make_language_text_file(language))
+        add_sequences_of_whitespaces(make_language_text_file(language))
 
 
 if __name__ == "__main__":
