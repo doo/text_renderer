@@ -61,9 +61,10 @@ def process_dataset(ds: Path):
             image_path.rename(new_image_path)
 
             if RENDER_MASK and masks_dir.exists():
-                mask_path = masks_dir / image_path.name
+                mask_filename = image_path.stem + ".png"
+                mask_path = masks_dir / mask_filename
                 if mask_path.exists():
-                    new_mask_path = shard_masks_dir / mask_path.name
+                    new_mask_path = shard_masks_dir / mask_filename
                     mask_path.rename(new_mask_path)
 
     archive_path = ds.parent / f"{ds.name}.zip"

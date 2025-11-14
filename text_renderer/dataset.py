@@ -180,8 +180,8 @@ class ImgDataset(Dataset):
         self._data["sizes"][name] = (width, height)
 
         if mask is not None:
-            mask_path = os.path.join(self._mask_dir, name + ".jpg")
-            cv2.imwrite(mask_path, mask, self.encode_param())
+            mask_path = os.path.join(self._mask_dir, name + ".png")
+            cv2.imwrite(mask_path, mask)
 
     def read(self, name: str) -> Dict:
         img_path = os.path.join(self._img_dir, name + ".jpg")
