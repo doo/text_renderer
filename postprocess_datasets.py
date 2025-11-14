@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import List
 
 import click
-import cv2 as cv
 
 from render_config import RENDER_MASK
 
@@ -15,10 +14,7 @@ SHARD_SIZE = 1000
 
 
 def get_image_files(images_dir: Path) -> List[Path]:
-    image_files = []
-    for img_file in sorted(images_dir.glob("*.jpg")):
-        image_files.append(img_file)
-    return image_files
+    return sorted(images_dir.glob("*.jpg"))
 
 
 def create_archive(dataset_dir: Path, archive_path: Path):
@@ -28,25 +24,6 @@ def create_archive(dataset_dir: Path, archive_path: Path):
                 file_path = Path(root) / file
                 arc_name = file_path.relative_to(dataset_dir)
                 zf.write(file_path, arc_name)
-
-
-def split_on_image_and_mask(
-    image_path: Path, shard_images_dir: Path, shard_masks_dir: Path
-):
-    img = cv.imread(str(image_path))
-    _, w = img.shape[:2]
-    assert w % 3 == 0, f"Image width is not divisible by 3: {image_path=}, {img.shape=}"
-
-    image = img[:, : w // 3]
-    mask = img[:, 2 * w // 3 :]
-    assert (
-        image.shape == mask.shape
-    ), f"Image and mask shapes do not match: {image.shape=}, {mask.shape=}"
-    mask = cv.cvtColor(mask, cv.COLOR_BGR2GRAY)
-
-    cv.imwrite(str(shard_images_dir / image_path.name), image)
-    cv.imwrite(str(shard_masks_dir / image_path.name), mask)
-    image_path.unlink()
 
 
 def process_dataset(ds: Path):
@@ -75,16 +52,19 @@ def process_dataset(ds: Path):
         shard_images_dir = images_dir / f"{shard_idx:05d}"
         shard_images_dir.mkdir(exist_ok=True)
 
-        shard_masks_dir = masks_dir / f"{shard_idx:05d}"
-        if RENDER_MASK:
+        if RENDER_MASK and masks_dir.exists():
+            shard_masks_dir = masks_dir / f"{shard_idx:05d}"
             shard_masks_dir.mkdir(parents=True, exist_ok=True)
 
         for image_path in shard_images:
-            if RENDER_MASK:
-                split_on_image_and_mask(image_path, shard_images_dir, shard_masks_dir)
-            else:
-                new_image_path = shard_images_dir / image_path.name
-                image_path.rename(new_image_path)
+            new_image_path = shard_images_dir / image_path.name
+            image_path.rename(new_image_path)
+
+            if RENDER_MASK and masks_dir.exists():
+                mask_path = masks_dir / image_path.name
+                if mask_path.exists():
+                    new_mask_path = shard_masks_dir / mask_path.name
+                    mask_path.rename(new_mask_path)
 
     archive_path = ds.parent / f"{ds.name}.zip"
     create_archive(ds, archive_path)

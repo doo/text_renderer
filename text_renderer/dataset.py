@@ -7,7 +7,7 @@ and their corresponding labels. It supports both image file storage and LMDB dat
 
 import json
 import os
-from typing import Dict, Tuple
+from typing import Dict, Optional, Tuple
 
 import cv2
 import lmdb
@@ -42,7 +42,13 @@ class Dataset:
         """
         return [int(cv2.IMWRITE_JPEG_QUALITY), self.jpg_quality]
 
-    def write(self, name: str, image: np.ndarray, label: str):
+    def write(
+        self,
+        name: str,
+        image: np.ndarray,
+        label: str,
+        mask: Optional[np.ndarray] = None,
+    ):
         """
         Write an image and its label to the dataset.
 
@@ -50,6 +56,7 @@ class Dataset:
             name (str): Unique identifier for the image
             image (np.ndarray): Image data as numpy array
             label (str): Text label corresponding to the image
+            mask (np.ndarray): Optional mask data as numpy array
         """
         pass
 
@@ -137,8 +144,11 @@ class ImgDataset(Dataset):
     def __init__(self, data_dir: str):
         super().__init__(data_dir)
         self._img_dir = os.path.join(data_dir, "images")
+        self._mask_dir = os.path.join(data_dir, "masks")
         if not os.path.exists(self._img_dir):
             os.makedirs(self._img_dir)
+        if not os.path.exists(self._mask_dir):
+            os.makedirs(self._mask_dir)
         self._label_path = os.path.join(data_dir, self.LABEL_NAME)
 
         self._data = {"num-samples": 0, "labels": {}, "sizes": {}}
@@ -146,7 +156,13 @@ class ImgDataset(Dataset):
             with open(self._label_path, "r", encoding="utf-8") as f:
                 self._data = json.load(f)
 
-    def write(self, name: str, image: np.ndarray, label: str):
+    def write(
+        self,
+        name: str,
+        image: np.ndarray,
+        label: str,
+        mask: Optional[np.ndarray] = None,
+    ):
         """
         Write an image as JPEG file and update the JSON metadata.
 
@@ -154,6 +170,7 @@ class ImgDataset(Dataset):
             name (str): Unique identifier for the image
             image (np.ndarray): Image data as numpy array
             label (str): Text label corresponding to the image
+            mask (np.ndarray): Optional mask data as numpy array
         """
         img_path = os.path.join(self._img_dir, name + ".jpg")
         cv2.imwrite(img_path, image, self.encode_param())
@@ -161,6 +178,10 @@ class ImgDataset(Dataset):
 
         height, width = image.shape[:2]
         self._data["sizes"][name] = (width, height)
+
+        if mask is not None:
+            mask_path = os.path.join(self._mask_dir, name + ".jpg")
+            cv2.imwrite(mask_path, mask, self.encode_param())
 
     def read(self, name: str) -> Dict:
         img_path = os.path.join(self._img_dir, name + ".jpg")
@@ -221,7 +242,13 @@ class LmdbDataset(Dataset):
         self._lmdb_env = lmdb.open(self.data_dir, map_size=1099511627776)  # 1T
         self._lmdb_txn = self._lmdb_env.begin(write=True)
 
-    def write(self, name: str, image: np.ndarray, label: str):
+    def write(
+        self,
+        name: str,
+        image: np.ndarray,
+        label: str,
+        mask: Optional[np.ndarray] = None,
+    ):
         """
         Write an image and its label to the LMDB database.
 
@@ -229,6 +256,7 @@ class LmdbDataset(Dataset):
             name (str): Unique identifier for the image
             image (np.ndarray): Image data as numpy array
             label (str): Text label corresponding to the image
+            mask (np.ndarray): Optional mask data (not used for LMDB)
         """
         self._lmdb_txn.put(
             self.image_key(name),

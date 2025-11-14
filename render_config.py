@@ -1,1 +1,1 @@
-RENDER_MASK = False
+RENDER_MASK = True

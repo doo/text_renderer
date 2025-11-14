@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import cv2
 import numpy as np
@@ -63,7 +63,7 @@ class Render:
         self.bg_manager = BgManager(cfg.bg_dir, cfg.pre_load_bg_img)
 
     @retry
-    def __call__(self, *args, **kwargs) -> Tuple[np.ndarray, str]:
+    def __call__(self, *args, **kwargs) -> Tuple[np.ndarray, str, Optional[np.ndarray]]:
         """
         Generate a synthetic text image with the configured settings.
 
@@ -71,9 +71,10 @@ class Render:
         the complete pipeline from text generation to final image output.
 
         Returns:
-            Tuple[np.ndarray, str]: A tuple containing:
+            Tuple[np.ndarray, str, np.ndarray]: A tuple containing:
                 - np.ndarray: The generated image as a numpy array (BGR format)
                 - str: The text that was rendered
+                - np.ndarray: The mask as a numpy array (if return_bg_and_mask=True, else None)
 
         Raises:
             Exception: Any exception that occurs during rendering process
@@ -89,31 +90,20 @@ class Render:
                     img, BBox.from_size(img.size)
                 )
 
+            img = img.convert("RGB")
+            np_img = np.array(img)
+            np_img = cv2.cvtColor(np_img, cv2.COLOR_RGB2BGR)
+            np_img = self.norm(np_img)
+
+            mask = None
             if self.cfg.return_bg_and_mask:
                 gray_text_mask = np.array(transformed_text_mask.convert("L"))
-                _, gray_text_mask = cv2.threshold(
+                _, mask = cv2.threshold(
                     gray_text_mask, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU
                 )
-                transformed_text_mask = Image.fromarray(255 - gray_text_mask)
+                mask = 255 - mask
 
-                merge_target = Image.new("RGBA", (img.width * 3, img.height))
-                merge_target.paste(img, (0, 0))
-                merge_target.paste(cropped_bg, (img.width, 0))
-                merge_target.paste(
-                    transformed_text_mask,
-                    (img.width * 2, 0),
-                    mask=transformed_text_mask,
-                )
-
-                np_img = np.array(merge_target)
-                np_img = cv2.cvtColor(np_img, cv2.COLOR_RGBA2BGR)
-                np_img = self.norm(np_img)
-            else:
-                img = img.convert("RGB")
-                np_img = np.array(img)
-                np_img = cv2.cvtColor(np_img, cv2.COLOR_RGB2BGR)
-                np_img = self.norm(np_img)
-            return np_img, text
+            return np_img, text, mask
         except Exception as e:
             logger.exception(e)
             raise e
