@@ -102,6 +102,7 @@ class Render:
                     gray_text_mask, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU
                 )
                 mask = 255 - mask
+                mask = self.norm(mask, interpolation=cv2.INTER_NEAREST)
 
             return np_img, text, mask
         except Exception as e:
@@ -329,7 +330,7 @@ class Render:
         """
         return isinstance(self.corpus, list) and len(self.corpus) > 1
 
-    def norm(self, image: np.ndarray) -> np.ndarray:
+    def norm(self, image: np.ndarray, interpolation=cv2.INTER_CUBIC) -> np.ndarray:
         """
         Normalize the image according to configuration settings.
 
@@ -343,16 +344,14 @@ class Render:
         Returns:
             np.ndarray: Normalized image
         """
-        if self.cfg.gray:
+        if self.cfg.gray and len(image.shape) == 3 and image.shape[2] == 3:
             image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
         if self.cfg.height != -1 and self.cfg.height != image.shape[0]:
             height, width = image.shape[:2]
             width = int(width // (height / self.cfg.height))
-            if self.cfg.return_bg_and_mask:
-                width = int(width // (height / self.cfg.height)) // 3 * 3
             image = cv2.resize(
-                image, (width, self.cfg.height), interpolation=cv2.INTER_CUBIC
+                image, (width, self.cfg.height), interpolation=interpolation
             )
 
         return image
