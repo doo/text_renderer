@@ -63,7 +63,9 @@ class Render:
         self.bg_manager = BgManager(cfg.bg_dir, cfg.pre_load_bg_img)
 
     @retry
-    def __call__(self, *args, **kwargs) -> Tuple[np.ndarray, str, Optional[np.ndarray]]:
+    def __call__(
+        self, *args, **kwargs
+    ) -> Tuple[np.ndarray, str, Optional[np.ndarray], Optional[list]]:
         """
         Generate a synthetic text image with the configured settings.
 
@@ -71,19 +73,32 @@ class Render:
         the complete pipeline from text generation to final image output.
 
         Returns:
-            Tuple[np.ndarray, str, np.ndarray]: A tuple containing:
+            Tuple[np.ndarray, str, np.ndarray, list]: A tuple containing:
                 - np.ndarray: The generated image as a numpy array (BGR format)
                 - str: The text that was rendered
                 - np.ndarray: The mask as a numpy array (if return_bg_and_mask=True, else None)
+                - list: Character bboxes
 
         Raises:
             Exception: Any exception that occurs during rendering process
         """
         try:
             if self._should_apply_layout():
-                img, text, cropped_bg, transformed_text_mask = self.gen_multi_corpus()
+                (
+                    img,
+                    text,
+                    cropped_bg,
+                    transformed_text_mask,
+                    char_bboxes,
+                ) = self.gen_multi_corpus()
             else:
-                img, text, cropped_bg, transformed_text_mask = self.gen_single_corpus()
+                (
+                    img,
+                    text,
+                    cropped_bg,
+                    transformed_text_mask,
+                    char_bboxes,
+                ) = self.gen_single_corpus()
 
             if self.cfg.render_effects is not None:
                 img, _ = self.cfg.render_effects.apply_effects(
@@ -104,12 +119,12 @@ class Render:
                 mask = 255 - mask
                 mask = self.norm(mask, interpolation=cv2.INTER_NEAREST)
 
-            return np_img, text, mask
+            return np_img, text, mask, char_bboxes
         except Exception as e:
             logger.exception(e)
             raise e
 
-    def gen_single_corpus(self) -> Tuple[PILImage, str, PILImage, PILImage]:
+    def gen_single_corpus(self) -> Tuple[PILImage, str, PILImage, PILImage, list]:
         """
         Generate text image from a single corpus.
 
@@ -123,11 +138,12 @@ class Render:
         7. Paste text on background
 
         Returns:
-            Tuple[PILImage, str, PILImage, PILImage]: A tuple containing:
+            Tuple[PILImage, str, PILImage, PILImage, list]: A tuple containing:
                 - PILImage: Final rendered image
                 - str: The text that was rendered
                 - PILImage: Cropped background image
                 - PILImage: Transformed text mask
+                - list: Character bboxes
         """
         font_text = self.corpus.sample()
 
@@ -139,7 +155,7 @@ class Render:
         if self.corpus.cfg.text_color_cfg is not None:
             text_color = self.corpus.cfg.text_color_cfg.get_color(bg)
 
-        text_mask = draw_text_on_bg(
+        text_mask, char_bboxes = draw_text_on_bg(
             font_text, text_color, char_spacing=self.corpus.cfg.char_spacing
         )
 
@@ -167,9 +183,9 @@ class Render:
 
         img, cropped_bg = self.paste_text_mask_on_bg(bg, transformed_text_mask)
 
-        return img, font_text.text, cropped_bg, transformed_text_mask
+        return img, font_text.text, cropped_bg, transformed_text_mask, char_bboxes
 
-    def gen_multi_corpus(self) -> Tuple[PILImage, str, PILImage, PILImage]:
+    def gen_multi_corpus(self) -> Tuple[PILImage, str, PILImage, PILImage, list]:
         """
         Generate text image from multiple corpora using layout management.
 
@@ -185,11 +201,12 @@ class Render:
         9. Paste merged text on background
 
         Returns:
-            Tuple[PILImage, str, PILImage, PILImage]: A tuple containing:
+            Tuple[PILImage, str, PILImage, PILImage, list]: A tuple containing:
                 - PILImage: Final rendered image
                 - str: The merged text that was rendered
                 - PILImage: Cropped background image
                 - PILImage: Transformed text mask
+                - list: Character bboxes
         """
         font_texts: List[FontText] = [it.sample() for it in self.corpus]
 
@@ -200,6 +217,8 @@ class Render:
             text_color = self.cfg.text_color_cfg.get_color(bg)
 
         text_masks, text_bboxes = [], []
+        all_char_bboxes = []
+        char_bbox_groups = []  # Track which chars belong to which corpus
         for i in range(len(font_texts)):
             font_text = font_texts[i]
 
@@ -207,9 +226,11 @@ class Render:
                 _text_color = self.corpus[i].cfg.text_color_cfg.get_color(bg)
             else:
                 _text_color = text_color
-            text_mask = draw_text_on_bg(
+            text_mask, char_bboxes = draw_text_on_bg(
                 font_text, _text_color, char_spacing=self.corpus[i].cfg.char_spacing
             )
+            char_bbox_groups.append(char_bboxes)
+            all_char_bboxes.extend(char_bboxes)
 
             text_bbox = BBox.from_size(text_mask.size)
             if self.cfg.corpus_effects is not None:
@@ -228,6 +249,11 @@ class Render:
             raise PanicError(
                 "points and text_bboxes should have same length after layout output"
             )
+
+        # Adjust character bboxes based on layout positioning
+        adjusted_char_bboxes = self._adjust_char_bboxes_for_layout(
+            char_bbox_groups, text_masks, text_mask_bboxes, merged_text, font_texts
+        )
 
         merged_bbox = BBox.from_bboxes(text_mask_bboxes)
         merged_text_mask = transparent_img(merged_bbox.size)
@@ -253,7 +279,7 @@ class Render:
 
         img, cropped_bg = self.paste_text_mask_on_bg(bg, transformed_text_mask)
 
-        return img, merged_text, cropped_bg, transformed_text_mask
+        return img, merged_text, cropped_bg, transformed_text_mask, adjusted_char_bboxes
 
     def paste_text_mask_on_bg(
         self, bg: PILImage, transformed_text_mask: PILImage
@@ -329,6 +355,52 @@ class Render:
             bool: True if layout should be applied, False otherwise
         """
         return isinstance(self.corpus, list) and len(self.corpus) > 1
+
+    def _adjust_char_bboxes_for_layout(
+        self,
+        char_bbox_groups: List[List],
+        text_masks: List,
+        text_mask_bboxes: List[BBox],
+        merged_text: str,
+        font_texts: List[FontText],
+    ) -> List:
+        """
+        Adjust character bounding boxes based on layout positioning.
+
+        For SameLineLayout: Shift character coordinates to match new text positions
+        For ExtraTextLineLayout: Return only characters from the main text
+        """
+        from text_renderer.layout.extra_text_line import ExtraTextLineLayout
+
+        if isinstance(self.layout, ExtraTextLineLayout):
+            # For ExtraTextLineLayout, only return chars from main text (first corpus)
+            main_char_bboxes = char_bbox_groups[0] if char_bbox_groups else []
+            # Apply offset for main text positioning
+            if main_char_bboxes and text_mask_bboxes:
+                main_text_offset = text_mask_bboxes[0].left_top
+                for char_data in main_char_bboxes:
+                    if 'bbox' in char_data:
+                        char_data['bbox'] = [
+                            [x + main_text_offset[0], y + main_text_offset[1]]
+                            for x, y in char_data['bbox']
+                        ]
+            return main_char_bboxes
+
+        # For SameLineLayout and other layouts, adjust all character positions
+        adjusted_chars = []
+        for i, char_group in enumerate(char_bbox_groups):
+            if i < len(text_mask_bboxes):
+                text_offset = text_mask_bboxes[i].left_top
+                for char_data in char_group:
+                    adjusted_char = char_data.copy()
+                    if 'bbox' in adjusted_char:
+                        adjusted_char['bbox'] = [
+                            [x + text_offset[0], y + text_offset[1]]
+                            for x, y in adjusted_char['bbox']
+                        ]
+                    adjusted_chars.append(adjusted_char)
+
+        return adjusted_chars
 
     def norm(self, image: np.ndarray, interpolation=cv2.INTER_CUBIC) -> np.ndarray:
         """

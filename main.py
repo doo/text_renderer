@@ -78,7 +78,13 @@ class DBWriterProcess(Process):
                         break
 
                     name = "{:09d}".format(exist_count + count)
-                    db.write(name, m["image"], m["label"], m.get("mask"))
+                    db.write(
+                        name,
+                        m["image"],
+                        m["label"],
+                        m.get("mask"),
+                        m.get("char_bboxes"),
+                    )
                     count += 1
                     if count % log_period == 0:
                         logger.info(
@@ -108,6 +114,8 @@ def generate_img(data_queue):
         item = {"image": data[0], "label": data[1]}
         if len(data) > 2 and data[2] is not None:
             item["mask"] = data[2]
+        if len(data) > 3 and data[3] is not None:
+            item["char_bboxes"] = data[3]
         data_queue.put(item)
 
 

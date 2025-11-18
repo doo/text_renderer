@@ -48,6 +48,7 @@ class Dataset:
         image: np.ndarray,
         label: str,
         mask: Optional[np.ndarray] = None,
+        char_bboxes: Optional[list] = None,
     ):
         """
         Write an image and its label to the dataset.
@@ -57,6 +58,7 @@ class Dataset:
             image (np.ndarray): Image data as numpy array
             label (str): Text label corresponding to the image
             mask (np.ndarray): Optional mask data as numpy array
+            char_bboxes (list): Optional character bounding boxes
         """
         pass
 
@@ -151,10 +153,13 @@ class ImgDataset(Dataset):
             os.makedirs(self._mask_dir)
         self._label_path = os.path.join(data_dir, self.LABEL_NAME)
 
-        self._data = {"num-samples": 0, "labels": {}, "sizes": {}}
+        self._data = {"num-samples": 0, "labels": {}, "sizes": {}, "chars": {}}
         if os.path.exists(self._label_path):
             with open(self._label_path, "r", encoding="utf-8") as f:
-                self._data = json.load(f)
+                loaded_data = json.load(f)
+                self._data.update(loaded_data)
+                if "chars" not in self._data:
+                    self._data["chars"] = {}
 
     def write(
         self,
@@ -162,6 +167,7 @@ class ImgDataset(Dataset):
         image: np.ndarray,
         label: str,
         mask: Optional[np.ndarray] = None,
+        char_bboxes: Optional[list] = None,
     ):
         """
         Write an image as JPEG file and update the JSON metadata.
@@ -171,6 +177,7 @@ class ImgDataset(Dataset):
             image (np.ndarray): Image data as numpy array
             label (str): Text label corresponding to the image
             mask (np.ndarray): Optional mask data as numpy array
+            char_bboxes (list): Optional character bounding boxes
         """
         img_path = os.path.join(self._img_dir, name + ".jpg")
         cv2.imwrite(img_path, image, self.encode_param())
@@ -178,6 +185,9 @@ class ImgDataset(Dataset):
 
         height, width = image.shape[:2]
         self._data["sizes"][name] = (width, height)
+
+        if char_bboxes is not None:
+            self._data["chars"][name] = char_bboxes
 
         if mask is not None:
             mask_path = os.path.join(self._mask_dir, name + ".png")
@@ -248,6 +258,7 @@ class LmdbDataset(Dataset):
         image: np.ndarray,
         label: str,
         mask: Optional[np.ndarray] = None,
+        char_bboxes: Optional[list] = None,
     ):
         """
         Write an image and its label to the LMDB database.
@@ -257,6 +268,7 @@ class LmdbDataset(Dataset):
             image (np.ndarray): Image data as numpy array
             label (str): Text label corresponding to the image
             mask (np.ndarray): Optional mask data (not used for LMDB)
+            char_bboxes (list): Optional character bounding boxes
         """
         self._lmdb_txn.put(
             self.image_key(name),
@@ -266,6 +278,11 @@ class LmdbDataset(Dataset):
 
         height, width = image.shape[:2]
         self._lmdb_txn.put(self.size_key(name), f"{width},{height}".encode())
+
+        if char_bboxes is not None:
+            import json
+
+            self._lmdb_txn.put(self.chars_key(name), json.dumps(char_bboxes).encode())
 
     def read(self, name: str) -> Dict:
         """
@@ -361,6 +378,18 @@ class LmdbDataset(Dataset):
             bytes: Encoded key for size data
         """
         return f"size-{name}".encode()
+
+    def chars_key(self, name: str) -> bytes:
+        """
+        Generate the LMDB key for character bboxes data.
+
+        Args:
+            name (str): Image identifier
+
+        Returns:
+            bytes: Encoded key for character data
+        """
+        return f"chars-{name}".encode()
 
     def __enter__(self):
         """Context manager entry."""
