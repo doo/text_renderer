@@ -192,7 +192,7 @@ def _get_tight_char_bbox(
     char_width, char_height = char_size
 
     # Create a larger canvas to ensure we capture the full character
-    padding = 5
+    padding = 20
     canvas_width = char_width + 2 * padding
     canvas_height = char_height + 2 * padding
 
@@ -204,20 +204,23 @@ def _get_tight_char_bbox(
 
     if np.any(mask_array > 0):
         coords = np.where(mask_array > 0)
-        min_y, max_y = int(coords[0].min()), int(coords[0].max())
-        min_x, max_x = int(coords[1].min()), int(coords[1].max())
+        min_y, max_y = coords[0].min(), coords[0].max()
+        min_x, max_x = coords[1].min(), coords[1].max()
+
+        max_y += 1
+        max_x += 1
 
         # Remove padding offset and add global position
-        x1, y1 = int(x + min_x - padding), int(y + min_y - padding)
-        x2, y2 = int(x + max_x - padding), int(y + min_y - padding)
-        x3, y3 = int(x + max_x - padding), int(y + max_y - padding)
-        x4, y4 = int(x + min_x - padding), int(y + max_y - padding)
+        x1, y1 = x + min_x - padding, y + min_y - padding
+        x2, y2 = x + max_x - padding, y + min_y - padding
+        x3, y3 = x + max_x - padding, y + max_y - padding
+        x4, y4 = x + min_x - padding, y + max_y - padding
 
         return [[x1, y1], [x2, y2], [x3, y3], [x4, y4]]
     else:
         return [
-            [int(x), int(y)],
-            [int(x + char_width), int(y)],
-            [int(x + char_width), int(y + char_height)],
-            [int(x), int(y + char_height)],
+            [x, y],
+            [x + char_width, y],
+            [x + char_width, y + char_height],
+            [x, y + char_height],
         ]

@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import List, Optional, Tuple
 
 import cv2
 import numpy as np
@@ -33,7 +33,9 @@ class Curve(Effect):
         self.period = period
         self.amplitude = amplitude
 
-    def apply(self, img: PILImage, text_bbox: BBox) -> Tuple[PILImage, BBox]:
+    def apply(
+        self, img: PILImage, text_bbox: BBox, char_bboxes: Optional[List] = None
+    ) -> Tuple[PILImage, BBox, Optional[List]]:
         max_val = np.random.uniform(*self.amplitude)
 
         word_img = np.array(img)
@@ -68,7 +70,23 @@ class Curve(Effect):
         dst = cv2.remap(word_img, img_x, img_y, cv2.INTER_CUBIC)
         bbox = BBox(left=xmin, top=remap_y_min, right=xmax, bottom=remap_y_max)
         bbox = bbox.offset((bbox.left, bbox.top), (0, 0))
-        return Image.fromarray(dst), bbox
+
+        # Apply curve transformation to character bboxes if provided
+        updated_char_bboxes = char_bboxes
+        if char_bboxes:
+            updated_char_bboxes = []
+            for char_info in char_bboxes:
+                updated_char_info = char_info.copy()
+                if 'bbox' in char_info and char_info['bbox']:
+                    updated_bbox = []
+                    for corner in char_info['bbox']:
+                        x, y = corner
+                        curved_y = y + self._remap_y(x, max_val)
+                        updated_bbox.append([int(x), int(curved_y)])
+                    updated_char_info['bbox'] = updated_bbox
+                updated_char_bboxes.append(updated_char_info)
+
+        return Image.fromarray(dst), bbox, updated_char_bboxes
 
     def _remap_y(self, x, max_val):
         return int(max_val * np.sin(2 * 3.14 * x / self.period))

@@ -1,9 +1,10 @@
-from typing import Tuple
+from typing import List, Optional, Tuple
 
 import numpy as np
 
 from text_renderer.utils.bbox import BBox
 from text_renderer.utils.draw_utils import transparent_img
+from text_renderer.utils.keypoint_utils import update_char_bboxes_with_offset
 from text_renderer.utils.types import PILImage
 from text_renderer.utils.utils import random_xy_offset
 
@@ -33,7 +34,9 @@ class Padding(Effect):
         self.h_ratio = h_ratio
         self.center = center
 
-    def apply(self, img: PILImage, text_bbox: BBox) -> Tuple[PILImage, BBox]:
+    def apply(
+        self, img: PILImage, text_bbox: BBox, char_bboxes: Optional[List] = None
+    ) -> Tuple[PILImage, BBox, Optional[List]]:
         w_ratio = np.random.uniform(*self.w_ratio)
         h_ratio = np.random.uniform(*self.h_ratio)
         new_w = int(img.width + img.width * w_ratio)
@@ -49,4 +52,6 @@ class Padding(Effect):
         new_img.paste(img, xy)
 
         new_bbox = text_bbox.move_origin(xy)
-        return new_img, new_bbox
+        updated_char_bboxes = update_char_bboxes_with_offset(char_bboxes, xy[0], xy[1])
+
+        return new_img, new_bbox, updated_char_bboxes

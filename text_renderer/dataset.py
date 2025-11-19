@@ -187,6 +187,11 @@ class ImgDataset(Dataset):
         self._data["sizes"][name] = (width, height)
 
         if char_bboxes is not None:
+            for ch in char_bboxes:
+                if 'bbox' in ch:
+                    for i in range(len(ch['bbox'])):
+                        ch['bbox'][i][0] = float(round(ch['bbox'][i][0], 3))
+                        ch['bbox'][i][1] = float(round(ch['bbox'][i][1], 3))
             self._data["chars"][name] = char_bboxes
 
         if mask is not None:

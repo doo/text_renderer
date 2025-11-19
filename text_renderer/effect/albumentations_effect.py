@@ -1,10 +1,14 @@
-from typing import List, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import albumentations as A
 import numpy as np
 from PIL import Image
 
 from text_renderer.utils.bbox import BBox
+from text_renderer.utils.keypoint_utils import (
+    char_bboxes_to_keypoints,
+    keypoints_to_char_bboxes,
+)
 from text_renderer.utils.types import PILImage
 
 from .base_effect import Effect
@@ -19,9 +23,11 @@ class AlbumentationsEffect(Effect):
         super().__init__(p)
         self.transform = transform
 
-    def apply(self, img: PILImage, text_bbox: BBox) -> Tuple[PILImage, BBox]:
+    def apply(
+        self, img: PILImage, text_bbox: BBox, char_bboxes: Optional[List] = None
+    ) -> Tuple[PILImage, BBox, Optional[List]]:
         if self.transform is None:
-            return img, text_bbox
+            return img, text_bbox, char_bboxes
 
         # Convert PIL image to numpy array
         img_array = np.array(img)
@@ -42,9 +48,29 @@ class AlbumentationsEffect(Effect):
         else:
             rgb_array = img_array
 
+        keypoints = None
+        if char_bboxes:
+            keypoints = char_bboxes_to_keypoints(char_bboxes)
+
         # Apply transformation
-        transformed = self.transform(image=rgb_array)
-        transformed_img = transformed["image"]
+        if keypoints:
+            keypoint_params = A.KeypointParams(format='xy', remove_invisible=False)
+            if isinstance(self.transform, A.Compose):
+                transform_with_keypoints = A.Compose(
+                    self.transform.transforms, keypoint_params=keypoint_params
+                )
+            else:
+                transform_with_keypoints = A.Compose(
+                    [self.transform], keypoint_params=keypoint_params
+                )
+
+            transformed = transform_with_keypoints(image=rgb_array, keypoints=keypoints)
+            transformed_img = transformed["image"]
+            transformed_keypoints = transformed.get("keypoints", keypoints)
+        else:
+            transformed = self.transform(image=rgb_array)
+            transformed_img = transformed["image"]
+            transformed_keypoints = keypoints
 
         # Convert back to PIL image
         if has_alpha:
@@ -54,9 +80,17 @@ class AlbumentationsEffect(Effect):
             )
             rgba_array[:, :, :3] = transformed_img
             rgba_array[:, :, 3] = img_array[:, :, 3]  # Preserve original alpha
-            return Image.fromarray(rgba_array, mode='RGBA'), text_bbox
+            result_img = Image.fromarray(rgba_array, mode='RGBA')
         else:
-            return Image.fromarray(transformed_img), text_bbox
+            result_img = Image.fromarray(transformed_img)
+
+        updated_char_bboxes = char_bboxes
+        if char_bboxes and transformed_keypoints:
+            updated_char_bboxes = keypoints_to_char_bboxes(
+                transformed_keypoints, char_bboxes
+            )
+
+        return result_img, text_bbox, updated_char_bboxes
 
 
 class Emboss(AlbumentationsEffect):

@@ -1,5 +1,5 @@
 import random
-from typing import Tuple
+from typing import List, Optional, Tuple
 
 from text_renderer.utils.bbox import BBox
 from text_renderer.utils.types import PILImage
@@ -23,12 +23,14 @@ class DropoutVertical(Effect):
         self.num_line = num_line
         self.thickness = thickness
 
-    def apply(self, img: PILImage, text_bbox: BBox) -> Tuple[PILImage, BBox]:
+    def apply(
+        self, img: PILImage, text_bbox: BBox, char_bboxes: Optional[List] = None
+    ) -> Tuple[PILImage, BBox, Optional[List]]:
         # Check if there's enough space for the dropout effect
         if img.width <= self.thickness + 1:
             # Not enough space for dropout, return original image
-            return img, text_bbox
-            
+            return img, text_bbox, char_bboxes
+
         pim = img.load()
 
         for _ in range(self.num_line):
@@ -37,4 +39,4 @@ class DropoutVertical(Effect):
                 for row in range(img.height):
                     self.fix_pick(pim, col + i, row, (0, 20))
 
-        return img, text_bbox
+        return img, text_bbox, char_bboxes

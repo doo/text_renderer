@@ -15,6 +15,7 @@ from text_renderer.utils.bbox import BBox
 from text_renderer.utils.draw_utils import draw_text_on_bg, transparent_img
 from text_renderer.utils.errors import PanicError
 from text_renderer.utils.font_text import FontText
+from text_renderer.utils.keypoint_utils import update_char_bboxes_with_offset
 from text_renderer.utils.math_utils import PerspectiveTransform
 from text_renderer.utils.types import FontColor, is_list
 
@@ -101,14 +102,14 @@ class Render:
                 ) = self.gen_single_corpus()
 
             if self.cfg.render_effects is not None:
-                img, _ = self.cfg.render_effects.apply_effects(
-                    img, BBox.from_size(img.size)
+                img, _, char_bboxes = self.cfg.render_effects.apply_effects(
+                    img, BBox.from_size(img.size), char_bboxes
                 )
 
             img = img.convert("RGB")
             np_img = np.array(img)
             np_img = cv2.cvtColor(np_img, cv2.COLOR_RGB2BGR)
-            np_img = self.norm(np_img)
+            np_img, char_bboxes = self.norm(np_img, char_bboxes)
 
             mask = None
             if self.cfg.return_bg_and_mask:
@@ -117,7 +118,7 @@ class Render:
                     gray_text_mask, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU
                 )
                 mask = 255 - mask
-                mask = self.norm(mask, interpolation=cv2.INTER_NEAREST)
+                mask, _ = self.norm(mask, interpolation=cv2.INTER_NEAREST)
 
             return np_img, text, mask, char_bboxes
         except Exception as e:
@@ -160,8 +161,8 @@ class Render:
         )
 
         if self.cfg.corpus_effects is not None:
-            text_mask, _ = self.cfg.corpus_effects.apply_effects(
-                text_mask, BBox.from_size(text_mask.size)
+            text_mask, _, char_bboxes = self.cfg.corpus_effects.apply_effects(
+                text_mask, BBox.from_size(text_mask.size), char_bboxes
             )
 
         if self.cfg.perspective_transform is not None:
@@ -173,7 +174,8 @@ class Render:
                 (
                     transformed_text_mask,
                     transformed_text_pnts,
-                ) = transformer.do_warp_perspective(text_mask)
+                    char_bboxes,
+                ) = transformer.do_warp_perspective(text_mask, char_bboxes=char_bboxes)
             except Exception as e:
                 logger.exception(e)
                 logger.error(font_text.font_path, "text", font_text.text)
@@ -229,14 +231,16 @@ class Render:
             text_mask, char_bboxes = draw_text_on_bg(
                 font_text, _text_color, char_spacing=self.corpus[i].cfg.char_spacing
             )
-            char_bbox_groups.append(char_bboxes)
-            all_char_bboxes.extend(char_bboxes)
 
             text_bbox = BBox.from_size(text_mask.size)
             if self.cfg.corpus_effects is not None:
                 effects = self.cfg.corpus_effects[i]
                 if effects is not None:
-                    text_mask, text_bbox = effects.apply_effects(text_mask, text_bbox)
+                    text_mask, text_bbox, char_bboxes = effects.apply_effects(
+                        text_mask, text_bbox, char_bboxes
+                    )
+            char_bbox_groups.append(char_bboxes)
+            all_char_bboxes.extend(char_bboxes)
             text_masks.append(text_mask)
             text_bboxes.append(text_bbox)
 
@@ -268,13 +272,22 @@ class Render:
             (
                 transformed_text_mask,
                 transformed_text_pnts,
-            ) = transformer.do_warp_perspective(merged_text_mask)
+                adjusted_char_bboxes,
+            ) = transformer.do_warp_perspective(
+                merged_text_mask, char_bboxes=adjusted_char_bboxes
+            )
         else:
             transformed_text_mask = merged_text_mask
 
         if self.cfg.layout_effects is not None:
-            transformed_text_mask, _ = self.cfg.layout_effects.apply_effects(
-                transformed_text_mask, BBox.from_size(transformed_text_mask.size)
+            (
+                transformed_text_mask,
+                _,
+                adjusted_char_bboxes,
+            ) = self.cfg.layout_effects.apply_effects(
+                transformed_text_mask,
+                BBox.from_size(transformed_text_mask.size),
+                adjusted_char_bboxes,
             )
 
         img, cropped_bg = self.paste_text_mask_on_bg(bg, transformed_text_mask)
@@ -378,12 +391,9 @@ class Render:
             # Apply offset for main text positioning
             if main_char_bboxes and text_mask_bboxes:
                 main_text_offset = text_mask_bboxes[0].left_top
-                for char_data in main_char_bboxes:
-                    if 'bbox' in char_data:
-                        char_data['bbox'] = [
-                            [x + main_text_offset[0], y + main_text_offset[1]]
-                            for x, y in char_data['bbox']
-                        ]
+                main_char_bboxes = update_char_bboxes_with_offset(
+                    main_char_bboxes, main_text_offset[0], main_text_offset[1]
+                )
             return main_char_bboxes
 
         # For SameLineLayout and other layouts, adjust all character positions
@@ -391,39 +401,66 @@ class Render:
         for i, char_group in enumerate(char_bbox_groups):
             if i < len(text_mask_bboxes):
                 text_offset = text_mask_bboxes[i].left_top
-                for char_data in char_group:
-                    adjusted_char = char_data.copy()
-                    if 'bbox' in adjusted_char:
-                        adjusted_char['bbox'] = [
-                            [x + text_offset[0], y + text_offset[1]]
-                            for x, y in adjusted_char['bbox']
-                        ]
-                    adjusted_chars.append(adjusted_char)
+                adjusted_group = update_char_bboxes_with_offset(
+                    char_group, text_offset[0], text_offset[1]
+                )
+                adjusted_chars.extend(adjusted_group if adjusted_group else [])
 
         return adjusted_chars
 
-    def norm(self, image: np.ndarray, interpolation=cv2.INTER_CUBIC) -> np.ndarray:
+    def norm(
+        self,
+        image: np.ndarray,
+        char_bboxes: Optional[List] = None,
+        interpolation=cv2.INTER_CUBIC,
+    ) -> Tuple[np.ndarray, Optional[List]]:
         """
         Normalize the image according to configuration settings.
 
         This method applies final image processing including:
         - Grayscale conversion (if configured)
         - Height normalization (if configured)
+        - Character bbox scaling (if image is resized)
 
         Args:
             image (np.ndarray): Input image as numpy array
+            char_bboxes (Optional[List]): Character bounding boxes to scale if image is resized
+            interpolation: OpenCV interpolation method for resizing
 
         Returns:
-            np.ndarray: Normalized image
+            Tuple[np.ndarray, Optional[List]]: Normalized image and scaled character bboxes
         """
+        original_height, original_width = image.shape[:2]
+        updated_char_bboxes = char_bboxes
+
         if self.cfg.gray and len(image.shape) == 3 and image.shape[2] == 3:
             image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
         if self.cfg.height != -1 and self.cfg.height != image.shape[0]:
             height, width = image.shape[:2]
-            width = int(width // (height / self.cfg.height))
+            new_width = int(width // (height / self.cfg.height))
+            new_height = self.cfg.height
+
+            # Calculate scaling factors
+            scale_x = new_width / original_width
+            scale_y = new_height / original_height
+
+            # Resize image
             image = cv2.resize(
-                image, (width, self.cfg.height), interpolation=interpolation
+                image, (new_width, new_height), interpolation=interpolation
             )
 
-        return image
+            if char_bboxes:
+                updated_char_bboxes = []
+                for char_info in char_bboxes:
+                    updated_char_info = char_info.copy()
+                    if 'bbox' in char_info and char_info['bbox']:
+                        updated_bbox = []
+                        for corner in char_info['bbox']:
+                            scaled_x = int(corner[0] * scale_x)
+                            scaled_y = int(corner[1] * scale_y)
+                            updated_bbox.append([scaled_x, scaled_y])
+                        updated_char_info['bbox'] = updated_bbox
+                    updated_char_bboxes.append(updated_char_info)
+
+        return image, updated_char_bboxes

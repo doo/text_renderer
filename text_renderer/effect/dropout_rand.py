@@ -1,5 +1,5 @@
 import random
-from typing import Tuple
+from typing import List, Optional, Tuple
 
 import numpy as np
 
@@ -24,7 +24,9 @@ class DropoutRand(Effect):
         super().__init__(p)
         self.dropout_p = dropout_p
 
-    def apply(self, img: PILImage, text_bbox: BBox) -> Tuple[PILImage, BBox]:
+    def apply(
+        self, img: PILImage, text_bbox: BBox, char_bboxes: Optional[List] = None
+    ) -> Tuple[PILImage, BBox, Optional[List]]:
         pim = img.load()
 
         alpha_channel = np.array(img).astype(np.uint8)[:, :, 3]
@@ -44,4 +46,4 @@ class DropoutRand(Effect):
             row = int(y)
             self.fix_pick(pim, col, row, [0, 1])
 
-        return img, text_bbox
+        return img, text_bbox, char_bboxes

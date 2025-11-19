@@ -7,7 +7,7 @@ image augmentation effects in text rendering operations.
 
 import random
 from abc import abstractmethod
-from typing import List, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 from text_renderer.effect.selector import Selector
 from text_renderer.utils.bbox import BBox
@@ -32,25 +32,30 @@ class Effect:
     def __init__(self, p: float = 0.5):
         self.p = p
 
-    def __call__(self, img: PILImage, text_bbox: BBox) -> Tuple[PILImage, BBox]:
+    def __call__(
+        self, img: PILImage, text_bbox: BBox, char_bboxes: Optional[List] = None
+    ) -> Tuple[PILImage, BBox, Optional[List]]:
         """
         Apply the effect with the configured probability.
 
         Args:
             img (PILImage): Input image to apply effect to
             text_bbox (BBox): Bounding box of text in the image
+            char_bboxes (List): Optional list of character bounding boxes
 
         Returns:
-            Tuple[PILImage, BBox]: Modified image and updated bounding box
+            Tuple[PILImage, BBox, Optional[List]]: Modified image, updated bounding box, and updated char bboxes
         """
         if prob(self.p):
             # Create a copy to ensure the image is writable
             img = img.copy()
-            return self.apply(img, text_bbox)
-        return img, text_bbox
+            return self.apply(img, text_bbox, char_bboxes)
+        return img, text_bbox, char_bboxes
 
     @abstractmethod
-    def apply(self, img: PILImage, text_bbox: BBox) -> Tuple[PILImage, BBox]:
+    def apply(
+        self, img: PILImage, text_bbox: BBox, char_bboxes: Optional[List] = None
+    ) -> Tuple[PILImage, BBox, Optional[List]]:
         """
         Apply the effect to the image.
 
@@ -60,9 +65,10 @@ class Effect:
         Args:
             img (PILImage): Image to apply effect to
             text_bbox (BBox): Bounding box of text in the image
+            char_bboxes (Optional[List]): Optional list of character bounding boxes
 
         Returns:
-            Tuple[PILImage, BBox]: Modified image and updated bounding box.
+            Tuple[PILImage, BBox, Optional[List]]: Modified image, updated bounding box, and updated char bboxes.
                 Some effects (such as Padding) may modify the relative
                 position of the text in the image.
         """
@@ -112,18 +118,21 @@ class NoEffects:
     input image and bounding box unchanged.
     """
 
-    def apply_effects(self, img: PILImage, bbox: BBox) -> Tuple[PILImage, BBox]:
+    def apply_effects(
+        self, img: PILImage, bbox: BBox, char_bboxes: Optional[List] = None
+    ) -> Tuple[PILImage, BBox, Optional[List]]:
         """
-        Return the input image and bounding box unchanged.
+        Return the input image, bounding box and char bboxes unchanged.
 
         Args:
             img (PILImage): Input image
             bbox (BBox): Input bounding box
+            char_bboxes (Optional[List]): Optional character bounding boxes
 
         Returns:
-            Tuple[PILImage, BBox]: Unchanged image and bounding box
+            Tuple[PILImage, BBox, Optional[List]]: Unchanged image, bounding box, and char bboxes
         """
-        return img, bbox
+        return img, bbox, char_bboxes
 
 
 class Effects:
@@ -152,19 +161,22 @@ class Effects:
             effects = [effects]
         self.effects = effects
 
-    def apply_effects(self, img: PILImage, bbox: BBox) -> Tuple[PILImage, BBox]:
+    def apply_effects(
+        self, img: PILImage, bbox: BBox, char_bboxes: Optional[List] = None
+    ) -> Tuple[PILImage, BBox, Optional[List]]:
         """
         Apply all configured effects to the image.
 
         Args:
             img (PILImage): Input image to apply effects to
             bbox (BBox): Bounding box of text in the image
+            char_bboxes (Optional[List]): Optional character bounding boxes
 
         Returns:
-            Tuple[PILImage, BBox]: Image with all effects applied and updated bounding box
+            Tuple[PILImage, BBox, Optional[List]]: Image with all effects applied, updated bounding box, and updated char bboxes
         """
         # Create a copy to ensure the image is writable
         img = img.copy()
         for e in self.effects:
-            img, bbox = e(img, bbox)
-        return img, bbox
+            img, bbox, char_bboxes = e(img, bbox, char_bboxes)
+        return img, bbox, char_bboxes

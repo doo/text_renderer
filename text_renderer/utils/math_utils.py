@@ -9,7 +9,7 @@ import math
 
 #!/usr/env/bin python3
 from functools import reduce
-from typing import Tuple
+from typing import Optional, Tuple
 
 import cv2
 import numpy as np
@@ -113,18 +113,20 @@ class PerspectiveTransform(object):
         return int(bbox_width), int(bbox_height)
 
     def do_warp_perspective(
-        self, pil_img: Image.Image
+        self, pil_img: Image.Image, char_bboxes: Optional[list] = None
     ) -> Tuple[Image.Image, np.ndarray]:
         """
         Apply perspective transformation to a PIL image.
 
         Args:
             pil_img (Image.Image): Input PIL image to transform
+            char_bboxes (Optional[list]): Optional list of character bounding boxes to transform
 
         Returns:
             Tuple[Image.Image, np.ndarray]: A tuple containing:
                 - Image.Image: Transformed image
                 - np.ndarray: Transformed corner points
+                - Optional[list]: Transformed character bounding boxes
         """
         text_box_pnts = utils.size_to_pnts(pil_img.size)
         img = np.array(pil_img).astype(np.uint8)
@@ -153,7 +155,17 @@ class PerspectiveTransform(object):
         transformed_pnts[:, 0] -= transformed_text_box[0]
         transformed_pnts[:, 1] -= transformed_text_box[1]
 
-        return dst, transformed_pnts
+        if char_bboxes is not None:
+            for i in range(len(char_bboxes)):
+                if 'bbox' in char_bboxes[i]:
+                    transformed_char_bbox = self.transform_pnts(
+                        char_bboxes[i]['bbox'], self.M33
+                    )
+                    transformed_char_bbox[:, 0] -= transformed_text_box[0]
+                    transformed_char_bbox[:, 1] -= transformed_text_box[1]
+                    char_bboxes[i]['bbox'] = transformed_char_bbox.tolist()
+
+        return dst, transformed_pnts, char_bboxes
 
     def transform_pnts(self, pnts: np.ndarray, M33: np.ndarray) -> np.ndarray:
         """

@@ -1,5 +1,5 @@
 import typing
-from typing import Tuple
+from typing import List, Optional, Tuple
 
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
@@ -57,24 +57,27 @@ class TextBorder(Effect):
         self.dark_enable = dark_enable
         self.dark_fraction = dark_fraction
 
-    def apply(self, img: PILImage, text_bbox: BBox) -> Tuple[PILImage, BBox]:
+    def apply(
+        self, img: PILImage, text_bbox: BBox, char_bboxes: Optional[List] = None
+    ) -> Tuple[PILImage, BBox, Optional[List]]:
         """
         Apply text border effect
 
         Args:
             img: Input image
             text_bbox: Text bounding box
+            char_bboxes: Optional character bounding boxes
 
         Returns:
-            Modified image and text bounding box
+            Modified image, text bounding box, and character bboxes
         """
         # Check if effect is enabled
         if not self.enable:
-            return img, text_bbox
+            return img, text_bbox, char_bboxes
 
         # Check fraction probability
         if np.random.random() > self.fraction:
-            return img, text_bbox
+            return img, text_bbox, char_bboxes
 
         # Convert to RGBA if not already
         if img.mode != "RGBA":
@@ -110,7 +113,7 @@ class TextBorder(Effect):
                 ImageFilter.GaussianBlur(radius=self.blur_radius)
             )
 
-        return result_img, text_bbox
+        return result_img, text_bbox, char_bboxes
 
     def _get_border_color(
         self, img: PILImage, text_bbox: BBox

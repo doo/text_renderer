@@ -1,11 +1,12 @@
 import typing
-from typing import Tuple
+from typing import List, Optional, Tuple
 
 import numpy as np
 from PIL import ImageDraw
 
 from text_renderer.utils.bbox import BBox
 from text_renderer.utils.draw_utils import transparent_img
+from text_renderer.utils.keypoint_utils import update_char_bboxes_with_offset
 from text_renderer.utils.types import PILImage
 
 if typing.TYPE_CHECKING:
@@ -49,7 +50,9 @@ class Line(Effect):
         self.line_pos_p = line_pos_p
         self.color_cfg = color_cfg
 
-    def apply(self, img: PILImage, text_bbox: BBox) -> Tuple[PILImage, BBox]:
+    def apply(
+        self, img: PILImage, text_bbox: BBox, char_bboxes: Optional[List] = None
+    ) -> Tuple[PILImage, BBox, Optional[List]]:
         # TODO: merge apply top/bottom/left.. to make it more efficient
         func = np.random.choice(
             [
@@ -66,16 +69,17 @@ class Line(Effect):
             ],
             p=self.line_pos_p,
         )
-        return func(img, text_bbox)
+        result_img, result_bbox, result_char_bboxes = func(img, text_bbox, char_bboxes)
+        return result_img, result_bbox, result_char_bboxes
 
     def apply_horizontal_middle(
-        self, img: PILImage, text_bbox: BBox
-    ) -> Tuple[PILImage, BBox]:
+        self, img: PILImage, text_bbox: BBox, char_bboxes: Optional[List] = None
+    ) -> Tuple[PILImage, BBox, Optional[List]]:
         # Check if there's enough space for the horizontal line
         if img.height <= 2:
             # Not enough space for horizontal line, return original image
-            return img, text_bbox
-            
+            return img, text_bbox, char_bboxes
+
         row = np.random.randint(1, img.height - 1)
         thickness = np.random.randint(*self.thickness)
 
@@ -87,16 +91,16 @@ class Line(Effect):
             width=thickness,
         )
 
-        return img, text_bbox
+        return img, text_bbox, char_bboxes
 
     def apply_vertical_middle(
-        self, img: PILImage, text_bbox: BBox
-    ) -> Tuple[PILImage, BBox]:
+        self, img: PILImage, text_bbox: BBox, char_bboxes: Optional[List] = None
+    ) -> Tuple[PILImage, BBox, Optional[List]]:
         # Check if there's enough space for the vertical line
         if img.width <= 2:
             # Not enough space for vertical line, return original image
-            return img, text_bbox
-            
+            return img, text_bbox, char_bboxes
+
         col = np.random.randint(1, img.width - 1)
         thickness = np.random.randint(*self.thickness)
 
@@ -108,9 +112,11 @@ class Line(Effect):
             width=thickness,
         )
 
-        return img, text_bbox
+        return img, text_bbox, char_bboxes
 
-    def apply_bottom(self, img: PILImage, text_bbox: BBox) -> Tuple[PILImage, BBox]:
+    def apply_bottom(
+        self, img: PILImage, text_bbox: BBox, char_bboxes: Optional[List] = None
+    ) -> Tuple[PILImage, BBox, Optional[List]]:
         in_offset, thickness, out_offset = self._get_tb_param()
         new_w = img.width
         new_h = img.height + thickness + in_offset + out_offset
@@ -130,16 +136,19 @@ class Line(Effect):
         text_bbox.bottom += thickness
         text_bbox.bottom += out_offset
 
-        return new_img, text_bbox
+        return new_img, text_bbox, char_bboxes
 
-    def apply_top(self, img: PILImage, text_bbox: BBox) -> Tuple[PILImage, BBox]:
+    def apply_top(
+        self, img: PILImage, text_bbox: BBox, char_bboxes: Optional[List] = None
+    ) -> Tuple[PILImage, BBox, Optional[List]]:
         in_offset, thickness, out_offset = self._get_tb_param()
 
         new_w = img.width
         new_h = img.height + thickness + in_offset
 
+        y_shift = thickness + in_offset + out_offset
         new_img = transparent_img((new_w, new_h))
-        new_img.paste(img, (0, thickness + in_offset + out_offset))
+        new_img.paste(img, (0, y_shift))
 
         draw = ImageDraw.Draw(new_img)
 
@@ -154,9 +163,13 @@ class Line(Effect):
         text_bbox.top -= thickness
         text_bbox.top -= out_offset
 
-        return new_img, text_bbox
+        updated_char_bboxes = update_char_bboxes_with_offset(char_bboxes, 0, y_shift)
 
-    def apply_right(self, img: PILImage, text_bbox: BBox) -> Tuple[PILImage, BBox]:
+        return new_img, text_bbox, updated_char_bboxes
+
+    def apply_right(
+        self, img: PILImage, text_bbox: BBox, char_bboxes: Optional[List] = None
+    ) -> Tuple[PILImage, BBox, Optional[List]]:
         in_offset, thickness, out_offset = self._get_lr_param()
 
         new_w = img.width + thickness + in_offset + out_offset
@@ -177,16 +190,19 @@ class Line(Effect):
         text_bbox.right += thickness
         text_bbox.right += out_offset
 
-        return new_img, text_bbox
+        return new_img, text_bbox, char_bboxes
 
-    def apply_left(self, img: PILImage, text_bbox: BBox) -> Tuple[PILImage, BBox]:
+    def apply_left(
+        self, img: PILImage, text_bbox: BBox, char_bboxes: Optional[List] = None
+    ) -> Tuple[PILImage, BBox, Optional[List]]:
         in_offset, thickness, out_offset = self._get_lr_param()
 
         new_w = img.width + thickness + in_offset + out_offset
         new_h = img.height
 
+        x_shift = thickness + in_offset + out_offset
         new_img = transparent_img((new_w, new_h))
-        new_img.paste(img, (thickness + in_offset + out_offset, 0))
+        new_img.paste(img, (x_shift, 0))
 
         draw = ImageDraw.Draw(new_img)
 
@@ -202,26 +218,32 @@ class Line(Effect):
         text_bbox.left -= thickness
         text_bbox.left -= out_offset
 
-        return new_img, text_bbox
+        updated_char_bboxes = update_char_bboxes_with_offset(char_bboxes, x_shift, 0)
 
-    def apply_top_left(self, img: PILImage, text_bbox: BBox) -> Tuple[PILImage, BBox]:
-        ret = self.apply_top(img, text_bbox)
+        return new_img, text_bbox, updated_char_bboxes
+
+    def apply_top_left(
+        self, img: PILImage, text_bbox: BBox, char_bboxes: Optional[List] = None
+    ) -> Tuple[PILImage, BBox, Optional[List]]:
+        ret = self.apply_top(img, text_bbox, char_bboxes)
         return self.apply_left(*ret)
 
-    def apply_top_right(self, img: PILImage, text_bbox: BBox) -> Tuple[PILImage, BBox]:
-        ret = self.apply_top(img, text_bbox)
+    def apply_top_right(
+        self, img: PILImage, text_bbox: BBox, char_bboxes: Optional[List] = None
+    ) -> Tuple[PILImage, BBox, Optional[List]]:
+        ret = self.apply_top(img, text_bbox, char_bboxes)
         return self.apply_right(*ret)
 
     def apply_bottom_left(
-        self, img: PILImage, text_bbox: BBox
-    ) -> Tuple[PILImage, BBox]:
-        ret = self.apply_bottom(img, text_bbox)
+        self, img: PILImage, text_bbox: BBox, char_bboxes: Optional[List] = None
+    ) -> Tuple[PILImage, BBox, Optional[List]]:
+        ret = self.apply_bottom(img, text_bbox, char_bboxes)
         return self.apply_left(*ret)
 
     def apply_bottom_right(
-        self, img: PILImage, text_bbox: BBox
-    ) -> Tuple[PILImage, BBox]:
-        ret = self.apply_bottom(img, text_bbox)
+        self, img: PILImage, text_bbox: BBox, char_bboxes: Optional[List] = None
+    ) -> Tuple[PILImage, BBox, Optional[List]]:
+        ret = self.apply_bottom(img, text_bbox, char_bboxes)
         return self.apply_right(*ret)
 
     def _get_lr_param(self) -> Tuple[int, int, int]:
