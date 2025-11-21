@@ -176,6 +176,7 @@ def post_generation_augmentation(image_files: list[Path], label_file: Path):
                 img = cv.GaussianBlur(img, (kernel_size, kernel_size), 0)
 
         cv.imwrite(str(img_file), img)
+        label_info['sizes'][img_file.stem] = [img.shape[1], img.shape[0]]
         label_info['chars'][img_file.stem] = chars
 
     with open(label_file, 'w') as f:
