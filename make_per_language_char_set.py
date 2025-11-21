@@ -43,7 +43,7 @@ blacklist = [
     b'\\u1c86',
 ]
 
-punctuation = string.punctuation + '…'
+punctuation = string.punctuation  # + '…'
 currency = '€£$¢'
 sign = '°±™¶§ⓇⒸⓒ®©'
 other = '•●|│❘⋮—−–‒‑־'
