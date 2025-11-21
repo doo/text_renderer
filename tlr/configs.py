@@ -4,7 +4,7 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
 
-from render_config import RENDER_MASK
+from render_config import RENDER_MASK, TARGET_HEIGHT
 
 # from make_per_language_char_set import latin_languages
 latin_languages = ['en', 'de'] + ['bash', 'dots', 'email', 'math', 'url']
@@ -123,7 +123,7 @@ def base_cfg(
             layout=layout,
             corpus=corpus,
             corpus_effects=corpus_effects,
-            height=40,
+            height=TARGET_HEIGHT,
             return_bg_and_mask=RENDER_MASK,
         ),
     )
