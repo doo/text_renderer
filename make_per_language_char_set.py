@@ -99,9 +99,7 @@ if __name__ == "__main__":
 
     dst_file = dst_dir / 'latin.txt'
     all_latin_chars = set()
-    for lang in languages:
-        if lang in ['bg', 'el', 'ru', 'uk']:
-            continue
+    for lang in ['de', 'en', 'it', 'pl', 'ro', 'tr']:
         src_file = dst_dir / f"{lang}.txt"
         assert src_file.exists(), f"File not found: {src_file}"
         with open(src_file, 'r', encoding='utf-8') as f:

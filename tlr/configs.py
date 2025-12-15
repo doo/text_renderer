@@ -7,7 +7,9 @@ sys.path.append(str(Path(__file__).parent.parent))
 from render_config import RENDER_MASK, TARGET_HEIGHT
 
 # from make_per_language_char_set import latin_languages
-latin_languages = ['en', 'de'] + ['bash', 'dots', 'email', 'math', 'url']
+latin_languages = (
+    ['en', 'de'] + ['bash', 'dots', 'email', 'math', 'url'] + ['it', 'pl', 'ro', 'tr']
+)
 
 from text_renderer.config import (
     GeneratorCfg,
