@@ -1,6 +1,5 @@
 import random
 import re
-import string
 import time
 from pathlib import Path
 from typing import Dict, List
@@ -212,6 +211,10 @@ def get_random_float() -> str:
     return s
 
 
+def random_remove_whitespace(match):
+    return match.group(0).strip() if random.random() < 0.5 else match.group(0)
+
+
 def add_bullets_and_vertical_lines(path: Path) -> None:
     bullets = '•●*'
     vertical_lines = '|│❘'
@@ -258,7 +261,7 @@ def add_bullets_and_vertical_lines(path: Path) -> None:
                 suffix = (
                     random.choice(line_starts) + ' ' if random.random() < 0.5 else ''
                 )
-                f.write(f"{suffix}{line}")
+                new_line = f'{suffix}{line}'
             elif p < 0.3:
                 words = line.split()
                 modified_words = []
@@ -279,9 +282,12 @@ def add_bullets_and_vertical_lines(path: Path) -> None:
                             suffix = random.choice(word_suffixes)
 
                     modified_words.append(f"{prefix}{word}{suffix}")
-                f.write(' '.join(modified_words) + '\n')
+                new_line = ' '.join(modified_words) + '\n'
+                new_line = re.sub(r' <|> ', random_remove_whitespace, new_line)
             else:
-                f.write(line)
+                new_line = line
+
+            f.write(new_line)
 
 
 def main() -> None:
