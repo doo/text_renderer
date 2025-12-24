@@ -15,15 +15,12 @@ mapping = {
     'µ': 'μ',  # MICRO SIGN                               --> GREEK SMALL LETTER MU
     '·': '•',  # MIDDLE DOT                               --> BULLET
     'º': '°',  # MASCULINE ORDINAL INDICATOR              --> DEGREE SIGN
-    'Ð': 'D',  # LATIN CAPITAL LETTER ETH                 --> LATIN CAPITAL LETTER D
     '×': 'x',  # MULTIPLICATION SIGN                      --> LATIN SMALL LETTER X
     'Ø': '0',  # LATIN CAPITAL LETTER O WITH STROKE       --> DIGIT ZERO
-    'Đ': 'D',  # LATIN CAPITAL LETTER D WITH STROKE       --> LATIN CAPITAL LETTER D
-    'đ': 'd',  # LATIN SMALL LETTER D WITH STROKE         --> LATIN SMALL LETTER D
+    'Đ': 'Ð',  # LATIN CAPITAL LETTER D WITH STROKE       --> LATIN CAPITAL LETTER ETH
+    'Ɖ': 'Ð',  # LATIN CAPITAL LETTER AFRICAN D           --> LATIN CAPITAL LETTER ETH
+    'đ': 'ð',  # LATIN SMALL LETTER D WITH STROKE         --> LATIN SMALL LETTER ETH
     'Ŀ': 'L',  # LATIN CAPITAL LETTER L WITH MIDDLE DOT   --> LATIN CAPITAL LETTER L
-    'Ł': 'L',  # LATIN CAPITAL LETTER L WITH STROKE       --> LATIN CAPITAL LETTER L
-    'ł': 'l',  # LATIN SMALL LETTER L WITH STROKE         --> LATIN SMALL LETTER L
-    'Ɖ': 'D',  # LATIN CAPITAL LETTER AFRICAN D           --> LATIN CAPITAL LETTER D
     'Ƒ': 'F',  # LATIN CAPITAL LETTER F WITH HOOK         --> LATIN CAPITAL LETTER F
     'ƒ': 'f',  # LATIN SMALL LETTER F WITH HOOK           --> LATIN SMALL LETTER F
     'ɓ': 'b',  # LATIN SMALL LETTER B WITH HOOK           --> LATIN SMALL LETTER B
@@ -73,7 +70,6 @@ mapping = {
     'Р': 'P',  # CYRILLIC CAPITAL LETTER ER               --> LATIN CAPITAL LETTER P
     'С': 'C',  # CYRILLIC CAPITAL LETTER ES               --> LATIN CAPITAL LETTER C
     'Т': 'T',  # CYRILLIC CAPITAL LETTER TE               --> LATIN CAPITAL LETTER T
-    'У': 'y',  # CYRILLIC CAPITAL LETTER U                --> LATIN SMALL LETTER Y
     'а': 'a',  # CYRILLIC SMALL LETTER A                  --> LATIN SMALL LETTER A
     'е': 'e',  # CYRILLIC SMALL LETTER IE                 --> LATIN SMALL LETTER E
     'о': 'o',  # CYRILLIC SMALL LETTER O                  --> LATIN SMALL LETTER O

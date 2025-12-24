@@ -15,7 +15,7 @@ LANGUAGES = (
 
 SRC_TEXT_FILES = [TEXT_DIR / f'{lang}_text.txt' for lang in LANGUAGES]
 
-DST_FILE = CURRENT_DIR / "tlr" / "text" / "rare_characters_samples.txt"
+DST_FILE = CURRENT_DIR / "tlr" / "text" / "rare_tokens_samples.txt"
 
 SAMPLE_MIN_LENGTH = 1
 SAMPLE_MAX_LENGTH = 100
@@ -36,6 +36,7 @@ TOKENS = {
     '"': 3000,
     '/': 3000,
     'J': 5000,
+    'ł': 13000,
     'ă': 5000,
     '=': 5000,
     '•': 5000,
@@ -70,6 +71,7 @@ TOKENS = {
     '&': 13000,
     'â': 13000,
     'Ö': 13000,
+    'Ł': 13000,
     'ß': 10000,
     'è': 13000,
     '+': 5000,
@@ -140,10 +142,6 @@ def find_samples_for_token(text: str, token: str, num_samples: int) -> List[str]
     samples = []
 
     positions = list(m.start() for m in re.finditer(re.escape(token), text))
-
-    for i, char in enumerate(text):
-        if char == token:
-            positions.append(i)
 
     indices = np.random.choice(np.arange(len(positions)), num_samples)
     positions = [positions[i] for i in indices]

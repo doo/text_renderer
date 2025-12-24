@@ -33,6 +33,7 @@ FONT_LIST_DIR = DATA_DIR / "font_list"
 FONT_LIST = FONT_LIST_DIR / "font_list.txt"
 FONT_BLACKLIST = FONT_LIST_DIR / "font_blacklist.txt"
 TEXT_DIR = DATA_DIR / "text"
+RARE_TOKENS_FILES = [TEXT_DIR / 'rare_tokens_samples.txt']
 
 FONT_SIZE = (30, 31)
 CHAR_SPACING = (-0.1, 0.5)
@@ -180,6 +181,20 @@ def get_rand_corpus(font_list_file, length=(3, 30)):
             chars_file=CHAR_DIR / f"latin.txt",
             length=length,
             char_spacing=CHAR_SPACING,
+            font_dir=FONT_DIR,
+            font_list_file=font_list_file,
+            font_size=FONT_SIZE,
+        ),
+    )
+
+
+def get_enum_corpus(font_list_file):
+    return EnumCorpus(
+        EnumCorpusCfg(
+            text_paths=RARE_TOKENS_FILES,
+            filter_by_chars=True,
+            char_spacing=CHAR_SPACING,
+            chars_file=CHAR_DIR / f"latin.txt",
             font_dir=FONT_DIR,
             font_list_file=font_list_file,
             font_size=FONT_SIZE,
@@ -459,19 +474,94 @@ def generate_per_font_configs():
     return configs
 
 
+def generate_rare_tokens_configs():
+    configs = []
+
+    num_images = 0
+    for file in RARE_TOKENS_FILES:
+        with open(file, 'r', encoding='utf-8') as f:
+            num_lines = sum(1 for line in f if line.strip())
+            num_images += num_lines
+
+    corpus = get_enum_corpus(FONT_LIST_DIR / 'fragile_and_robust_fonts.txt')
+    configs.append(
+        base_cfg(
+            f"latin_simple_rare_tokens_corpus",
+            corpus=corpus,
+            layout_effects=Effects(
+                [
+                    Padding(p=0.5, w_ratio=[0, 0.2], h_ratio=[0, 0.2]),
+                ]
+            ),
+            num_images=get_num_images(num_images, 0.2),
+        )
+    )
+
+    configs.append(
+        base_cfg(
+            f"latin_basic_rare_tokens_corpus",
+            corpus=corpus,
+            layout_effects=Effects(
+                [
+                    OneOf(
+                        [
+                            DropoutRand(),
+                            DropoutVertical(thickness=1),
+                            DropoutHorizontal(thickness=1),
+                        ]
+                    ),
+                    Padding(p=0.9, w_ratio=[0, 0.2], h_ratio=[0, 0.2]),
+                ]
+            ),
+            num_images=get_num_images(num_images, 0.2),
+        )
+    )
+
+    configs.append(
+        base_cfg(
+            f"latin_adjacent_line_rare_tokens_corpus",
+            layout=ExtraTextLineLayout(bottom_prob=0.5),
+            corpus=[corpus, corpus],
+            corpus_effects=[
+                Effects([Padding(p=0.9), DropoutRand(p=0.2)]),
+                NoEffects(),
+            ],
+            num_images=get_num_images(num_images, 0.4),
+        )
+    )
+
+    robust_corpus = get_enum_corpus(FONT_LIST_DIR / 'robust_fonts.txt')
+    configs.append(
+        base_cfg(
+            f"latin_hard_bg_rare_tokens_corpus",
+            corpus=robust_corpus,
+            corpus_effects=Effects(
+                [
+                    DropoutRand(p=0.5),
+                    Padding(p=0.9, w_ratio=[0, 0.2], h_ratio=[0, 0.2]),
+                ]
+            ),
+            bg_dir=BG_DIR,
+            num_images=get_num_images(num_images, 0.2),
+        )
+    )
+
+    return configs
+
+
 def generate_all_configs():
     num_images = 3 * 10**6
 
     all_configs = []
-    all_configs.extend(generate_basic_configs(get_num_images(num_images, 0.4)))
+    # all_configs.extend(generate_basic_configs(get_num_images(num_images, 0.4)))
     # all_configs.extend(generate_mixed_style_configs(get_num_images(num_images, 0.3)))
-    all_configs.extend(
-        generate_with_adjacent_line_configs(get_num_images(num_images, 0.4))
-    )
-    all_configs.extend(generate_hard_bg_configs(get_num_images(num_images, 0.2)))
+    # all_configs.extend(
+    # generate_with_adjacent_line_configs(get_num_images(num_images, 0.4))
+    # )
+    # all_configs.extend(generate_hard_bg_configs(get_num_images(num_images, 0.2)))
     # all_configs.extend(generate_extreme_fonts_configs(get_num_images(num_images, 0.05)))
-
-    all_configs.extend(generate_validation_configs(100))
+    all_configs.extend(generate_rare_tokens_configs())
+    all_configs.extend(generate_validation_configs(300))
 
     # debug per font
     # all_configs.extend(generate_per_font_configs())
