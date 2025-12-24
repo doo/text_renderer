@@ -1,5 +1,6 @@
 import os
 import random
+import re
 from pathlib import Path
 from typing import List
 
@@ -17,7 +18,7 @@ DST_FILE = CURRENT_DIR / "tlr" / "text" / "rare_characters_samples.txt"
 
 SAMPLE_MIN_LENGTH = 1
 SAMPLE_MAX_LENGTH = 100
-RARE_CHARACTERS = {
+TOKENS = {
     'j': 2000,
     '\'': 2000,
     'ü': 2000,
@@ -112,40 +113,44 @@ RARE_CHARACTERS = {
     'Ù': 13000,
     'Ź': 13000,
     'Ì': 13000,
+    'rn': 10000,
 }
 
 
-def extract_text_snippet(text: str, char_pos: int, min_len: int, max_len: int) -> str:
+def extract_text_snippet(
+    text: str, token_pos: int, token_len: int, min_len: int, max_len: int
+) -> str:
     snippet_length = random.randint(min_len, max_len - 1)
     shift = random.randint(0, snippet_length)
 
-    start_pos = max(0, char_pos - shift)
-    end_pos = min(len(text), start_pos + snippet_length)
+    start_pos = max(0, token_pos - shift)
+    end_pos = min(len(text), start_pos + snippet_length + token_len - 1)
 
     snippet = text[start_pos : end_pos + 1].replace('\n', ' ').replace('\r', '').strip()
     assert len(snippet) > 0
     assert (
-        text[char_pos] in snippet
-    ), f'{char_pos=}, {text[char_pos]=}, {start_pos=}, {end_pos=}, {snippet=}, {text[start_pos:end_pos]=}'
+        text[token_pos] in snippet
+    ), f'{token_pos=}, {text[token_pos]=}, {start_pos=}, {end_pos=}, {snippet=}, {text[start_pos:end_pos]=}, {token_len=}'
 
     return snippet
 
 
-def find_samples_for_character(
-    text: str, target_char: str, num_samples: int
-) -> List[str]:
+def find_samples_for_token(text: str, token: str, num_samples: int) -> List[str]:
     samples = []
-    positions = []
+
+    positions = list(m.start() for m in re.finditer(re.escape(token), text))
 
     for i, char in enumerate(text):
-        if char == target_char:
+        if char == token:
             positions.append(i)
 
     indices = np.random.choice(np.arange(len(positions)), num_samples)
     positions = [positions[i] for i in indices]
 
     for pos in positions:
-        snippet = extract_text_snippet(text, pos, SAMPLE_MIN_LENGTH, SAMPLE_MAX_LENGTH)
+        snippet = extract_text_snippet(
+            text, pos, len(token), SAMPLE_MIN_LENGTH, SAMPLE_MAX_LENGTH
+        )
         samples.append(snippet)
 
     return samples
@@ -167,8 +172,8 @@ def main():
 
     all_samples = []
 
-    for char, num_samples in RARE_CHARACTERS.items():
-        samples = find_samples_for_character(text, char, num_samples)
+    for token, num_samples in TOKENS.items():
+        samples = find_samples_for_token(text, token, num_samples)
         all_samples.extend(samples)
 
     DST_FILE.parent.mkdir(parents=True, exist_ok=True)
