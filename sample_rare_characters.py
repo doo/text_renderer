@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import List
 
 import numpy as np
+from tqdm import tqdm
 
 CURRENT_DIR = Path(os.path.abspath(os.path.dirname(__file__)))
 TEXT_DIR = CURRENT_DIR / "tlr" / "text"
@@ -172,7 +173,7 @@ def main():
 
     all_samples = []
 
-    for token, num_samples in TOKENS.items():
+    for token, num_samples in tqdm(TOKENS.items()):
         samples = find_samples_for_token(text, token, num_samples)
         all_samples.extend(samples)
 
