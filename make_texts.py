@@ -7,7 +7,7 @@ from typing import Dict, List
 import requests
 from tqdm import tqdm
 
-from make_per_language_char_set import currency, languages
+from make_per_language_char_set import currency, language_groups
 
 N_ARTICLES = 300
 DELAY_BETWEEN_REQUESTS = 1
@@ -291,14 +291,16 @@ def add_bullets_and_vertical_lines(path: Path) -> None:
 
 
 def main() -> None:
-    for language in tqdm(languages, desc="Processing languages"):
-        # process_language(language)
-        delete_empty_lines_in_file(make_language_text_file(language))
-        delete_sequences_of_whitespaces(make_language_text_file(language))
+    for group, languages in language_groups.items():
+        for language in tqdm(languages, desc="Processing languages"):
+            process_language(language)
+            delete_empty_lines_in_file(make_language_text_file(language))
+            delete_sequences_of_whitespaces(make_language_text_file(language))
 
-        add_caps(make_language_text_file(language))
-        add_bullets_and_vertical_lines(make_language_text_file(language))
-        add_sequences_of_whitespaces(make_language_text_file(language))
+            if group == 'latin':
+                add_caps(make_language_text_file(language))
+                add_bullets_and_vertical_lines(make_language_text_file(language))
+                add_sequences_of_whitespaces(make_language_text_file(language))
 
 
 if __name__ == "__main__":

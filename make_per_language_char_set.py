@@ -2,36 +2,58 @@ import string
 from pathlib import Path
 
 # ISO 639 language codes: https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes
-latin_languages = [
-    'bg',
-    'cs',
-    'da',
-    'de',
-    'el',
-    'en',
-    'es',
-    'et',
-    'fi',
-    'fr',
-    'ga',
-    'hr',
-    'hu',
-    'it',
-    'lt',
-    'lv',
-    'mt',
-    'nl',
-    'pl',
-    'pt',
-    'ro',
-    'ru',
-    'sk',
-    'sl',
-    'sv',
-    'tr',
-    'uk',
-]
-languages = latin_languages
+language_groups = {
+    'arabic': [
+        'ar',
+        'fa',
+        'pa',
+        'ps',
+        'sd',
+        'ug',
+        'ur',
+    ],
+    'cyrillic': [
+        'bg',
+        'ru',
+        'uk',
+    ],
+    'devanagari': [
+        'hi',
+        'mr',
+        'ne',
+        'sa',
+    ],
+    'greek': [
+        'el',
+    ],
+    'latin': [
+        # 'cs',
+        # 'da',
+        'de',
+        'en',
+        # 'es',
+        # 'et',
+        # 'fi',
+        # 'fr',
+        # 'ga',
+        # 'hr',
+        # 'hu',
+        'it',
+        # 'lt',
+        # 'lv',
+        # 'mt',
+        # 'nl',
+        'pl',
+        # 'pt',
+        'ro',
+        # 'sk',
+        # 'sl',
+        # 'sv',
+        'tr',
+    ],
+}
+
+languages = language_groups['latin']
 
 blacklist = [
     b'\\u1c80',
@@ -82,30 +104,32 @@ def get_exemplars(localeID, extype='main', option=2):
 if __name__ == "__main__":
     dst_dir = Path().cwd() / 'tlr' / 'char'
     ext = 'main'
-    for lang in languages:
-        dst_file = dst_dir / f"{lang}.txt"
-        try:
-            chars = get_exemplars(lang, ext)
-            chars.extend(common)
 
-            with open(dst_file, 'w', encoding='utf-8') as f:
-                for char in chars:
-                    if len(char) != 1 or char.encode('unicode_escape') in blacklist:
-                        continue
+    for group, languages in language_groups.items():
+        for lang in languages:
+            dst_file = dst_dir / f"{lang}.txt"
+            try:
+                chars = get_exemplars(lang, ext)
+                chars.extend(common)
 
-                    f.write(char + '\n')
-        except Exception as e:
-            print(f"Error processing language {lang}: {e}")
+                with open(dst_file, 'w', encoding='utf-8') as f:
+                    for char in chars:
+                        if len(char) != 1 or char.encode('unicode_escape') in blacklist:
+                            continue
 
-    dst_file = dst_dir / 'latin.txt'
-    all_latin_chars = set()
-    for lang in ['de', 'en', 'it', 'pl', 'ro', 'tr']:
-        src_file = dst_dir / f"{lang}.txt"
-        assert src_file.exists(), f"File not found: {src_file}"
-        with open(src_file, 'r', encoding='utf-8') as f:
-            chars = f.read()
-            all_latin_chars.update(set(chars))
-    all_latin_chars.discard('\n')
-    with open(dst_file, 'w', encoding='utf-8') as f:
-        for char in sorted(all_latin_chars):
-            f.write(char + '\n')
+                        f.write(char + '\n')
+            except Exception as e:
+                print(f"Error processing language {lang}: {e}")
+
+        dst_file = dst_dir / f'{group}.txt'
+        all_group_chars = set()
+        for lang in languages:
+            src_file = dst_dir / f"{lang}.txt"
+            assert src_file.exists(), f"File not found: {src_file}"
+            with open(src_file, 'r', encoding='utf-8') as f:
+                chars = f.read()
+                all_group_chars.update(set(chars))
+        all_group_chars.discard('\n')
+        with open(dst_file, 'w', encoding='utf-8') as f:
+            for char in sorted(all_group_chars):
+                f.write(char + '\n')
