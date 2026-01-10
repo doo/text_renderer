@@ -4,12 +4,14 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
 
+from make_per_language_char_set import language_groups
 from render_config import RENDER_MASK, TARGET_HEIGHT
 
-# from make_per_language_char_set import latin_languages
-latin_languages = (
-    ['en', 'de'] + ['bash', 'dots', 'email', 'math', 'url'] + ['it', 'pl', 'ro', 'tr']
-)
+extra_languages = ['bash', 'dots', 'email', 'math', 'url']
+language_group = 'devanagari'
+languages = language_groups[language_group]
+if language_group == 'latin':
+    languages += extra_languages
 
 from text_renderer.config import (
     GeneratorCfg,
@@ -35,8 +37,9 @@ FONT_BLACKLIST = FONT_LIST_DIR / "font_blacklist.txt"
 TEXT_DIR = DATA_DIR / "text"
 RARE_TOKENS_FILES = [TEXT_DIR / 'rare_tokens_samples.txt']
 
+CONTEXTUAL_FORM_GROUPS = ['arabic', 'devanagari']
 FONT_SIZE = (30, 31)
-CHAR_SPACING = (-0.1, 0.5)
+CHAR_SPACING = (-0.1, 0.5) if language_group not in CONTEXTUAL_FORM_GROUPS else -1
 
 
 def merge_fragile_and_robust_fonts():
@@ -93,7 +96,7 @@ def create_font_list():
 # create_font_list()
 
 perspective_transform = NormPerspectiveTransformCfg(20, 20, 1.5)
-LATIN_TEXTS = [TEXT_DIR / f"{lang_code}_text.txt" for lang_code in latin_languages]
+TEXT_FILES = [TEXT_DIR / f"{lang_code}_text.txt" for lang_code in languages]
 
 
 def get_num_images(num_images, part):
@@ -148,9 +151,9 @@ def get_test_corpus(font_list_file=FONT_LIST):
 def get_slice_corpus(font_list_file, length=(1, 30)):
     return CharCorpus(
         CharCorpusCfg(
-            text_paths=LATIN_TEXTS,
+            text_paths=TEXT_FILES,
             filter_by_chars=True,
-            chars_file=CHAR_DIR / f"latin.txt",
+            chars_file=CHAR_DIR / f"{language_group}.txt",
             length=length,
             char_spacing=CHAR_SPACING,
             font_dir=FONT_DIR,
@@ -163,9 +166,9 @@ def get_slice_corpus(font_list_file, length=(1, 30)):
 def get_word_corpus(font_list_file, num_word=(1, 5)):
     return WordCorpus(
         WordCorpusCfg(
-            text_paths=LATIN_TEXTS,
+            text_paths=TEXT_FILES,
             filter_by_chars=True,
-            chars_file=CHAR_DIR / f"latin.txt",
+            chars_file=CHAR_DIR / f"{language_group}.txt",
             num_word=num_word,
             char_spacing=CHAR_SPACING,
             font_dir=FONT_DIR,
@@ -178,7 +181,7 @@ def get_word_corpus(font_list_file, num_word=(1, 5)):
 def get_rand_corpus(font_list_file, length=(3, 30)):
     return RandCorpus(
         RandCorpusCfg(
-            chars_file=CHAR_DIR / f"latin.txt",
+            chars_file=CHAR_DIR / f"{language_group}.txt",
             length=length,
             char_spacing=CHAR_SPACING,
             font_dir=FONT_DIR,
@@ -194,7 +197,7 @@ def get_enum_corpus(font_list_file):
             text_paths=RARE_TOKENS_FILES,
             filter_by_chars=True,
             char_spacing=CHAR_SPACING,
-            chars_file=CHAR_DIR / f"latin.txt",
+            chars_file=CHAR_DIR / f"{language_group}.txt",
             font_dir=FONT_DIR,
             font_list_file=font_list_file,
             font_size=FONT_SIZE,
@@ -202,11 +205,17 @@ def get_enum_corpus(font_list_file):
     )
 
 
-CORPUS_FUNCTIONS = {
-    'slice': (0.5, get_slice_corpus),
-    'word': (0.5, get_word_corpus),
-    # 'rand': (0.1, get_rand_corpus),
-}
+CORPUS_FUNCTIONS = (
+    {
+        'slice': (0.5, get_slice_corpus),
+        'word': (0.5, get_word_corpus),
+        # 'rand': (0.1, get_rand_corpus),
+    }
+    if language_group not in CONTEXTUAL_FORM_GROUPS
+    else {
+        'word': (1.0, get_word_corpus),
+    }
+)
 
 
 def generate_basic_configs(num_images):
@@ -219,7 +228,7 @@ def generate_basic_configs(num_images):
     for corpus_name, (w, corpus) in corpuses.items():
         configs.append(
             base_cfg(
-                f"latin_simple_{corpus_name}_corpus",
+                f"{language_group}_simple_{corpus_name}_corpus",
                 corpus=corpus,
                 layout_effects=Effects(
                     [
@@ -232,7 +241,7 @@ def generate_basic_configs(num_images):
 
         configs.append(
             base_cfg(
-                f"latin_basic_{corpus_name}_corpus",
+                f"{language_group}_basic_{corpus_name}_corpus",
                 corpus=corpus,
                 layout_effects=Effects(
                     [
@@ -263,7 +272,7 @@ def generate_mixed_style_configs(num_images):
     for corpus_name, (w, corpus) in corpuses.items():
         configs.append(
             base_cfg(
-                f"latin_mixed_style_{corpus_name}_corpus",
+                f"{language_group}_mixed_style_{corpus_name}_corpus",
                 layout=SameLineLayout(h_spacing=(0, 0.01)),
                 corpus=[corpus, corpus],
                 corpus_effects=[
@@ -287,7 +296,7 @@ def generate_with_adjacent_line_configs(num_images):
     for corpus_name, (w, corpus) in corpuses.items():
         configs.append(
             base_cfg(
-                f"latin_adjacent_line_{corpus_name}_corpus",
+                f"{language_group}_adjacent_line_{corpus_name}_corpus",
                 layout=ExtraTextLineLayout(bottom_prob=0.5),
                 corpus=[corpus, corpus],
                 corpus_effects=[
@@ -311,7 +320,7 @@ def generate_hard_bg_configs(num_images):
     for corpus_name, (w, corpus) in corpuses.items():
         configs.append(
             base_cfg(
-                f"latin_hard_bg_{corpus_name}_corpus",
+                f"{language_group}_hard_bg_{corpus_name}_corpus",
                 corpus=corpus,
                 corpus_effects=Effects(
                     [
@@ -337,7 +346,7 @@ def generate_extreme_fonts_configs(num_images):
     for corpus_name, (w, corpus) in corpuses.items():
         configs.append(
             base_cfg(
-                f"latin_simple_extreme_fonts_{corpus_name}_corpus",
+                f"{language_group}_simple_extreme_fonts_{corpus_name}_corpus",
                 corpus=corpus,
                 layout_effects=Effects(
                     [
@@ -350,7 +359,7 @@ def generate_extreme_fonts_configs(num_images):
 
         configs.append(
             base_cfg(
-                f"latin_basic_extreme_fonts_{corpus_name}_corpus",
+                f"{language_group}_basic_extreme_fonts_{corpus_name}_corpus",
                 corpus=corpus,
                 layout_effects=Effects(
                     [
@@ -486,7 +495,7 @@ def generate_rare_tokens_configs():
     corpus = get_enum_corpus(FONT_LIST_DIR / 'fragile_and_robust_fonts.txt')
     configs.append(
         base_cfg(
-            f"latin_simple_rare_tokens_corpus",
+            f"{language_group}_simple_rare_tokens_corpus",
             corpus=corpus,
             layout_effects=Effects(
                 [
@@ -499,7 +508,7 @@ def generate_rare_tokens_configs():
 
     configs.append(
         base_cfg(
-            f"latin_basic_rare_tokens_corpus",
+            f"{language_group}_basic_rare_tokens_corpus",
             corpus=corpus,
             layout_effects=Effects(
                 [
@@ -519,7 +528,7 @@ def generate_rare_tokens_configs():
 
     configs.append(
         base_cfg(
-            f"latin_adjacent_line_rare_tokens_corpus",
+            f"{language_group}_adjacent_line_rare_tokens_corpus",
             layout=ExtraTextLineLayout(bottom_prob=0.5),
             corpus=[corpus, corpus],
             corpus_effects=[
@@ -533,7 +542,7 @@ def generate_rare_tokens_configs():
     robust_corpus = get_enum_corpus(FONT_LIST_DIR / 'robust_fonts.txt')
     configs.append(
         base_cfg(
-            f"latin_hard_bg_rare_tokens_corpus",
+            f"{language_group}_hard_bg_rare_tokens_corpus",
             corpus=robust_corpus,
             corpus_effects=Effects(
                 [
@@ -550,18 +559,18 @@ def generate_rare_tokens_configs():
 
 
 def generate_all_configs():
-    num_images = 3 * 10**6
+    num_images = 2 * 10**6
 
     all_configs = []
-    # all_configs.extend(generate_basic_configs(get_num_images(num_images, 0.4)))
+    all_configs.extend(generate_basic_configs(get_num_images(num_images, 0.4)))
     # all_configs.extend(generate_mixed_style_configs(get_num_images(num_images, 0.3)))
-    # all_configs.extend(
-    # generate_with_adjacent_line_configs(get_num_images(num_images, 0.4))
-    # )
-    # all_configs.extend(generate_hard_bg_configs(get_num_images(num_images, 0.2)))
+    all_configs.extend(
+        generate_with_adjacent_line_configs(get_num_images(num_images, 0.4))
+    )
+    all_configs.extend(generate_hard_bg_configs(get_num_images(num_images, 0.2)))
     # all_configs.extend(generate_extreme_fonts_configs(get_num_images(num_images, 0.05)))
-    all_configs.extend(generate_rare_tokens_configs())
-    all_configs.extend(generate_validation_configs(300))
+    # all_configs.extend(generate_rare_tokens_configs())
+    # all_configs.extend(generate_validation_configs(300))
 
     # debug per font
     # all_configs.extend(generate_per_font_configs())
