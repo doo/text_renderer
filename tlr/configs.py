@@ -8,7 +8,7 @@ from make_per_language_char_set import language_groups
 from render_config import RENDER_MASK, TARGET_HEIGHT
 
 extra_languages = ['bash', 'dots', 'email', 'math', 'url']
-language_group = 'devanagari'
+language_group = 'latin'
 languages = language_groups[language_group]
 if language_group == 'latin':
     languages += extra_languages
@@ -559,7 +559,7 @@ def generate_rare_tokens_configs():
 
 
 def generate_all_configs():
-    num_images = 2 * 10**6
+    num_images = 3 * 10**6
 
     all_configs = []
     all_configs.extend(generate_basic_configs(get_num_images(num_images, 0.4)))
