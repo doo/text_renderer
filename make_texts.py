@@ -151,6 +151,13 @@ def delete_sequences_of_whitespaces(path: Path) -> None:
         print(f"Failed to delete sequences of whitespaces in file {path}: {e}")
 
 
+def precise_upper(s: str) -> str:
+    upper_s = s
+    upper_s = upper_s.replace('ß', 'ẞ').upper()
+    assert len(s) == len(upper_s), f"Length mismatch: {s} -> {upper_s}"
+    return upper_s
+
+
 def add_caps(path: Path) -> None:
     try:
         with open(path, 'r', encoding='utf-8') as f:
@@ -159,11 +166,11 @@ def add_caps(path: Path) -> None:
         with open(path, 'w', encoding='utf-8') as f:
             for line in lines:
                 if random.random() < 0.1:
-                    f.write(line.upper())
+                    f.write(precise_upper(line))
                 elif random.random() < 0.1:
                     words = line.split()
                     modified_words = [
-                        word.upper() if random.random() < 0.5 else word
+                        precise_upper(word) if random.random() < 0.5 else word
                         for word in words
                     ]
                     f.write(' '.join(modified_words))
